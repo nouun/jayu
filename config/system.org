@@ -1,0 +1,342 @@
+#+TITLE: Guix System Configuration
+#+PROPERTY: header-args :mkdirp yes
+
+
+* Guix Channels
+
+Guix uses [[https://guix.gnu.org/manual/en/html_node/Channels.html][channels]]
+which are basically git repositories containing Guile files
+defining Guix packages that can be installed on your system.
+
+
+** nonguix
+
+As my current laptop uses a WiFi chip which doesn't have a
+supported libre driver and Guix is a
+[[https://www.gnu.org/distros/free-system-distribution-guidelines.html][free system]]
+so we have to add the
+[[https://gitlab.com/nonguix/nonguix][nonguix]] channel to use the non-free Linux kernel.
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/channels.scm
+  (define nonguix
+    (channel
+      (name 'nonguix)
+      (url "https://gitlab.com/nonguix/nonguix")
+      (introduction
+	(make-channel-introduction
+	  "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
+	  (openpgp-fingerprint
+	    "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5")))))
+#+END_SRC
+
+
+** rde
+
+[[https://git.sr.ht/~abcdw/rde][rde]] is an extension on top of Guix home which
+adds additional services for configuring the home environment
+and operating system.
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/channels.scm
+  (define rde
+    (channel
+      (name 'rde)
+      (url "https://git.sr.ht/~abcdw/rde")
+      (introduction
+	(make-channel-introduction
+	  "257cebd587b66e4d865b3537a9a88cccd7107c95"
+	  (openpgp-fingerprint
+	    "2841 9AC6 5038 7440 C7E9  2FFA 2208 D209 58C1 DEB0")))))
+#+END_SRC
+
+
+** Base Channels
+
+Return all the channels including the base channels which has
+the main Guix channel.
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/channels.scm
+  (cons* nonguix
+	 rde
+	 %default-channels)
+#+END_SRC
+
+
+* Base System
+
+This configuration is (will be) shared between different
+computers and as such they share the same base services,
+packages, and system.
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/base.scm
+  (define-module (jayu build system base)
+    #:use-module (gnu)
+    #:use-module (gnu packages)
+    #:use-module (gnu system)
+    #:use-module (gnu packages bash)
+    #:use-module (gnu packages shells))
+#+END_SRC
+
+
+** Packages
+
+Define some basic system agnostic packages to include in all
+machines.
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/base.scm
+  (define-public jayu-base-packages
+    (append
+      (map (compose list specification->package+output)
+      '("curl" "dbus" "emacs" "gash" "git" "gnupg"
+	"guile-readline" "ncurses" "nss-certs" "openssh"
+	"wget" "vim" "xdg-user-dirs" "xdg-utils"))
+      %base-packages))
+#+END_SRC
+
+
+** Services
+
+Define a service which adds coreutils to =/usr/bin/env=,
+Bash to =/bin/bash=, and Dash to =/bin/sh=.
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/base.scm
+  (define-public jayu-file-services
+    (list
+      (extra-special-file "/usr/bin/env"
+			  (file-append coreutils "/usr/bin/env"))
+      (extra-special-file "/bin/bash"
+			  (file-append bash "/bin/bash"))
+      (extra-special-file "/bin/sh"
+			  (file-append dash "/bin/sh"))))
+#+END_SRC
+
+
+** Users
+
+Define a list of users which will be on all machines.
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/base.scm
+  (define jayu-users
+    (list
+      (user-account
+       (name "nouun")
+       (comment "nouun")
+       (home-directory "/home/nouun")
+       (group "users")
+       (supplementary-groups
+	 '("wheel" "netdev" "audio" "video"))
+       (shell (file-append bash "/bin/bash")))))
+
+  (define-public jayu-base-users
+    (append
+       jayu-users
+       %base-user-accounts))
+#+END_SRC
+
+
+** Base System
+
+Define a base system which is inherited and updated in each
+specific machine configuration.
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/base.scm
+  (define-public jayu-base-system
+    (operating-system
+      (locale "en_NZ.utf8")
+      (timezone "Pacific/Auckland")
+      (host-name "guix")
+
+      (users jayu-base-users)
+      (packages jayu-base-packages)
+      (services jayu-file-services)
+
+      (bootloader
+	(bootloader-configuration
+	  (bootloader grub-efi-bootloader)
+	  (targets (list "/boot/efi"))))
+
+      ;; Guix requires file-system to be defined to create an operating-system
+      ;; so pass through a dummy file system which will be overriden in each
+      ;; machine configuration.
+      (file-systems
+	(cons* (file-system
+		 (mount-point "/")
+		 (device "none")
+		 (type "ext4")
+		 (check? #f))
+	       %base-file-systems))))
+#+END_SRC
+
+* Machines
+
+
+** Verrb
+
+Verrb is the configuration that is used on my Macbook Pro.
+Being an Apple Macbook, it uses a nonfree WiFi chip and as
+such, the non-free Linux kernel and b43 firmware are required
+to get WiFi working.
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/verrb.scm
+  (define-module (jayu build system verrb)
+    #:use-module (gnu)
+    #:use-module (gnu packages bash)
+    #:use-module (gnu packages firmware)
+    #:use-module (gnu packages messaging)
+    #:use-module (gnu system)
+    #:use-module (gnu services desktop)
+    #:use-module (gnu services dns)
+    #:use-module (gnu services networking)
+    #:use-module (gnu services messaging)
+    #:use-module (gnu services sddm)
+    #:use-module (gnu services ssh)
+    #:use-module (gnu services web)
+    #:use-module (gnu services xorg)
+    #:use-module (guix store)
+    #:use-module (srfi srfi-1)
+
+    ; Nonfree packages: linux, b43-firmware 
+    #:use-module (nongnu packages linux)
+    #:use-module (jayu packages nonfree)
+
+    #:use-module (jayu build system base)
+    #:use-module (jayu packages display-managers)
+    #:use-module (jayu packages extras)
+    #:use-module (jayu packages rust-apps))
+#+END_SRC
+
+
+*** Packages
+
+Define packages specific to Verrb. =alsa-utils= and
+=pulseaudio= are used for audio. My AwesomeWM configuration
+requires an upstream version, therefore =awesome-git= is used
+instead of the packaged version included in the Guix repos.
+=verrb-sddm-theme= is the SDDM theme that I made and use.
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/verrb.scm
+  (define verrb-packages
+    (append
+     (list awesome-git
+	   verrb-sddm-theme)
+     (map (compose list specification->package+output)
+	  '("alsa-utils" "pulseaudio"))
+     jayu-base-packages))
+#+END_SRC
+
+
+*** Services
+
+**** SDDM
+
+This will install SDDM as the display manager and use the
+verrb theme.
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/verrb.scm
+  (define verrb-sddm-service
+    (service sddm-service-type
+             (sddm-configuration
+              (theme "verrb"))))
+#+END_SRC
+
+
+**** Bitlbee
+
+Enable Bitlbee and install the Discord plugin so we can
+interact with Discord without having to use the bloated
+electron client.
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/verrb.scm
+  (define verrb-bitlbee-service
+    (service bitlbee-service-type
+	     (bitlbee-configuration
+	       (plugins
+	         (list bitlbee-discord)))))
+#+END_SRC
+
+
+**** Desktop Services
+
+Modify the default desktop services to do the following:
+
+1) Remove GDM as SDDM is used instead.
+2) Set Guix to always use 4 cores.
+3) Stop network-manager from modifying /etc/resolve.conf
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/verrb.scm
+  (define verrb-desktop-services
+     (modify-services
+       (remove (lambda (service)
+		(eq? (service-kind service) gdm-service-type))
+	   %desktop-services)
+
+       (guix-service-type
+	 config => (guix-configuration
+		    (inherit config)
+		    (extra-options '("--max-job=4"))))
+
+       (network-manager-service-type
+	 config => (network-manager-configuration
+		    (inherit config)
+		    (dns "none")))))
+#+END_SRC
+
+
+**** Verrb Services
+
+Append all services into a single list.
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/verrb.scm
+  (define verrb-services
+    (append (list verrb-sddm-service
+                  verrb-bitlbee-service)
+            verrb-desktop-services
+            jayu-file-services))
+#+END_SRC
+
+
+*** System
+
+
+**** File System
+
+Mount root and boot partitions.
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/verrb.scm
+  (define verrb-file-system
+    (cons* (file-system
+             (mount-point "/")
+             (device
+               (uuid "e66d5096-1a1a-420d-92f0-b01cf7d103ea"
+                     'ext4))
+             (type "ext4"))
+           (file-system
+             (mount-point "/boot/efi")
+             (device (uuid "A23F-3C5F" 'fat32))
+             (type "vfat"))
+           %base-file-systems))
+#+END_SRC
+
+
+**** System
+
+Return a new operating system which inherits the
+=jayu-base-system= created in the base configuration and
+passes through the variables we've already defined. As
+mentioned at the start, this machine requires the
+non-free Linux kernel and b43-firmware so we also set
+those.
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/verrb.scm
+  (operating-system
+    (inherit jayu-base-system)
+    (host-name "verrb")
+    (users jayu-base-users)
+    (file-systems verrb-file-system)
+  
+    (packages verrb-packages)
+    (services verrb-services)
+
+    (kernel linux)
+    (firmware (list b43-firmware)))
+#+END_SRC
+

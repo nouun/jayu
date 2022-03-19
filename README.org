@@ -1,0 +1,86 @@
+#+title: 자유 Config
+#+author: nouun <me@nouun.dev>
+#+date: 2022-03-19
+
+* Introduction
+
+The name Jayu is a transliterated version of the Korean
+word 자유 meaning Freedom. Jayu is the system
+configuration that I use on my personal
+[[https://guix.gnu.org][GNU Guix]] installation as well as the server I use for
+[[https://nouun.dev][nouun.dev]]. Everything is configured in
+[[https://www.gnu.org/software/guile/][Guile]], which is GNU's implentation of Scheme and is one
+of the best that I've tried.
+
+** Foreword
+
+This configuration currently uses the
+[[https://gitlab.com/nonguix/nonguix][Nonguix]] channel as well as b43-firmware manually packaged
+as my current laptop requires them for WiFi. Please
+respect GNU's rules and do not mention this repository in
+any official GNU communications channels, for example
+#guile or #guix on IRC.
+
+* Building
+
+** Building home config
+
+To build the current user:
+
+#+BEGIN_SRC shell
+  make home
+#+END_SRC
+
+Or to build a specific user:
+
+#+BEGIN_SRC shell
+  make home USER=nouun
+#+END_SRC
+
+** Building system configuration
+
+To build a specfic system:
+
+#+BEGIN_SRC shell
+  make system SYSTEM=verrb
+#+END_SRC
+
+* Layout
+
+The main layout is as follows:
+
+** =/config/=
+
+This contains the main system and home configurations.
+
+*** =/config/home/=
+
+This contains specific user setups, including custom
+services for each user.
+
+*** =/config/system/=
+
+This contains the abstracted systems configurations.
+
+** =/jayu/=
+
+This directory contains extensions to the Guix standard
+modules including new packages, services, etc.
+
+*** =/jayu/packages/=
+
+This contains packages which aren't found on the official
+Guix channel. Everything outside of
+=/jayu/packages/nonfree.scm= follows GNU's policy on free
+software.
+
+*** =/jayu/patches/=
+
+This contains patches required by some packages to ensure
+that they work as expected on a Guix system. All patches
+are prefixed by their respective package name.
+
+*** =/jayu/home-services/=
+
+This contains services for configuring applications which
+aren't officially supported by Guix Home or RDE.

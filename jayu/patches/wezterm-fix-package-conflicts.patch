@@ -1,0 +1,83 @@
+diff -Nuar wezterm-orig/config/Cargo.toml wezterm/config/Cargo.toml
+--- wezterm-orig/config/Cargo.toml	2022-01-02 09:33:40.000000000 +1300
++++ wezterm/config/Cargo.toml	2022-03-10 00:33:28.119851503 +1300
+@@ -13,7 +13,7 @@
+ [dependencies]
+ anyhow = "1.0"
+ battery = "0.7"
+-bitflags = "1.3"
++bitflags = "1.2"
+ bstr = "0.2"
+ chrono = {version="0.4", features=["unstable-locales"]}
+ colorgrad = "0.5"
+diff -Nuar wezterm-orig/pty/Cargo.toml wezterm/pty/Cargo.toml
+--- wezterm-orig/pty/Cargo.toml	2022-01-02 09:33:40.000000000 +1300
++++ wezterm/pty/Cargo.toml	2022-03-10 00:32:40.496494856 +1300
+@@ -26,7 +26,7 @@
+ ssh = ["ssh2"]
+ 
+ [target."cfg(windows)".dependencies]
+-bitflags = "1.3"
++bitflags = "1.2"
+ lazy_static = "1.4"
+ shared_library = "0.1"
+ winapi = { version = "0.3", features = [
+diff -Nuar wezterm-orig/term/Cargo.toml wezterm/term/Cargo.toml
+--- wezterm-orig/term/Cargo.toml	2022-01-02 09:33:40.000000000 +1300
++++ wezterm/term/Cargo.toml	2022-03-10 00:32:49.648371216 +1300
+@@ -15,7 +15,7 @@
+ 
+ [dependencies]
+ anyhow = "1.0"
+-bitflags = "1.3"
++bitflags = "1.2"
+ miniz_oxide = "0.4"
+ hex = "0.4"
+ image = "0.23"
+diff -Nuar wezterm-orig/termwiz/Cargo.toml wezterm/termwiz/Cargo.toml
+--- wezterm-orig/termwiz/Cargo.toml	2022-01-02 09:33:40.000000000 +1300
++++ wezterm/termwiz/Cargo.toml	2022-03-10 00:33:20.891949144 +1300
+@@ -12,7 +12,7 @@
+ 
+ [dependencies]
+ base64 = "0.13"
+-bitflags = "1.3"
++bitflags = "1.2"
+ cassowary = {version="0.3", optional=true}
+ cfg-if = "1.0"
+ anyhow = "1.0"
+diff -Nuar wezterm-orig/wezterm-gui/Cargo.toml wezterm/wezterm-gui/Cargo.toml
+--- wezterm-orig/wezterm-gui/Cargo.toml	2022-01-02 09:33:40.000000000 +1300
++++ wezterm/wezterm-gui/Cargo.toml	2022-03-10 00:33:13.900043596 +1300
+@@ -22,7 +22,7 @@
+ 
+ [dependencies]
+ anyhow = "1.0"
+-bitflags = "1.3"
++bitflags = "1.2"
+ chrono = {version="0.4", features=["unstable-locales"]}
+ codec = { path = "../codec" }
+ colorgrad = "0.5"
+diff -Nuar wezterm-orig/wezterm-input-types/Cargo.toml wezterm/wezterm-input-types/Cargo.toml
+--- wezterm-orig/wezterm-input-types/Cargo.toml	2022-01-02 09:33:40.000000000 +1300
++++ wezterm/wezterm-input-types/Cargo.toml	2022-03-10 00:33:35.135756730 +1300
+@@ -7,6 +7,6 @@
+ # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+ 
+ [dependencies]
+-bitflags = "1.3"
++bitflags = "1.2"
+ euclid = "0.22"
+ serde = {version="1.0", features = ["rc", "derive"]}
+diff -Nuar wezterm-orig/window/Cargo.toml wezterm/window/Cargo.toml
+--- wezterm-orig/window/Cargo.toml	2022-01-02 09:33:40.000000000 +1300
++++ wezterm/window/Cargo.toml	2022-03-10 00:33:02.972191219 +1300
+@@ -28,7 +28,7 @@
+ config = { path = "../config" }
+ color-types = { path = "../color-types" }
+ thiserror = "1.0"
+-bitflags = "1.3"
++bitflags = "1.2"
+ euclid = "0.22"
+ guillotiere = "0.6"
+ lazy_static = "1.4"

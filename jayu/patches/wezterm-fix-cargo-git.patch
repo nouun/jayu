@@ -1,0 +1,32 @@
+--- wezterm-orig/wezterm-ssh/Cargo.toml	2022-03-09 08:10:58.909684755 +1300
++++ wezterm/wezterm-ssh/Cargo.toml	2022-03-09 08:11:55.321415465 +1300
+@@ -27,7 +27,7 @@
+ regex = "1"
+ smol = "1.2"
+ ssh2 = {version="0.9.3", features=["openssl-on-win32"]}
+-libssh-rs = {version="0.1.2", features=["vendored"], git="https://github.com/wez/libssh-rs.git"}
++libssh-rs = {version="0.1.2", features=["vendored"]}
+ #libssh-rs = {path="../../libssh-rs/libssh-rs", features=["vendored"]}
+ thiserror = "1.0"
+ 
+--- wezterm-orig/window/Cargo.toml.orig	2022-03-09 08:15:28.708365643 +1300
++++ wezterm/window/Cargo.toml	2022-03-09 08:16:07.516170365 +1300
+@@ -41,7 +41,7 @@
+ resize = "0.5"
+ serde = {version="1.0", features = ["rc", "derive"]}
+ tiny-skia = "0.6"
+-glium = { version = "0.30", default-features = false, git = "https://github.com/glium/glium.git", rev="aed95270f0714036003589d6e52de196e7ff75d1" }
++glium = { version = "0.30", default-features = false }
+ wezterm-font = { path = "../wezterm-font" }
+ wezterm-input-types = { path = "../wezterm-input-types" }
+ 
+@@ -65,7 +65,7 @@
+ x11 = {version ="2.18", features = ["xlib_xcb"]}
+ xcb = {version="0.9", features=["render", "xkb", "xlib_xcb"]}
+ xcb-util = { features = [ "cursor", "image", "icccm", "ewmh", "keysyms"], version = "0.3" }
+-xkbcommon = { version = "0.5", features = ["x11", "wayland"], git="https://github.com/wez/xkbcommon-rs.git", rev="01a0a0cd5663405e6e4abb1ad3add9add1496f58"}
++xkbcommon = { version = "0.5", features = ["x11", "wayland"] }
+ mio = "0.6"
+ libc = "0.2"
+ smithay-client-toolkit = {version = "0.15", default-features=false, optional=true}
+
