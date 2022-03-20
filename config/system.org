@@ -359,7 +359,8 @@ hosts my website and git frontend.
     #:use-module (gnu services ssh)
     #:use-module (gnu services web)
     #:use-module (guix store)
-    #:use-module (srfi srfi-1))
+    #:use-module (srfi srfi-1)
+    #:use-module (jayu build system base))
 #+END_SRC
 
 *** Packages
@@ -367,10 +368,12 @@ hosts my website and git frontend.
 Define packages specific to Pronouun.
 
 #+BEGIN_SRC scheme :tangle ../jayu/build/system/pronouun.scm
+  (use-package-modules certs tls)
+  
   (define pronouun-packages
     (append
      (list nss-certs
-           certbot)
+	   certbot)
      jayu-base-packages))
 #+END_SRC
 
@@ -409,6 +412,7 @@ Git frontend
 
 #+BEGIN_SRC scheme :tangle ../jayu/build/system/pronouun.scm
   (use-service-modules cgit)
+  (use-package-modules version-control)
 
   (define (cert-path host file)
     (format #f "/etc/letsencrypt/live/~a/~a.pem"
@@ -443,7 +447,8 @@ Git frontend
 	      (repository-directory "/home/cgit/repositories")
 	      (nocache? #t)
 	      (nginx
-		()))))
+               (list
+                 pronouun-cgit-nginx-configuration)))))
 #+END_SRC
 
 **** Nginx
@@ -455,7 +460,6 @@ nginx
 
   (define pronouun-website-nginx-configuration
     (nginx-server-configuration
-     (root cgit)
      (server-name '("nouun.dev"
 		    "www.nouun.dev"))
      (listen '("80"))))
@@ -511,8 +515,10 @@ certbot
 dhcp
 
 #+BEGIN_SRC scheme :tangle ../jayu/build/system/pronouun.scm
+  (use-service-modules networking)
+  
   (define pronouun-dhcp-service
-    (service dhcp-service-type))
+    (service dhcp-client-service-type))
 #+END_SRC
 
 **** OpenSSH
@@ -529,7 +535,7 @@ as such, OpenSSH doesn't need X11 support.
              (openssh-configuration
               (openssh openssh-sans-x)
               (password-authentication? #t)
-              (perit-root-login? #f))))
+              (permit-root-login #f))))
 #+END_SRC
 
 
@@ -614,7 +620,7 @@ Test
     (inherit jayu-base-system)
     (host-name "pronouun")
     (users pronouun-users)
-    (file-systems pronouu-file-system)
+    (file-systems pronouun-file-system)
   
     (packages pronouun-packages)
     (services pronouun-services))
