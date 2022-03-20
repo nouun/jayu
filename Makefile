@@ -53,7 +53,7 @@ clean:
 --reconfigure-system: --tangle-system
 	@{ \
 		echo -e "--> [${GREEN}Jayu${CLEAR}] Reconfiguring Guix System"
-		if sudo -E guix system -L ./ reconfigure ./jayu/build/system/verrb.scm; then
+		if sudo -E guix system -L ./ reconfigure ./jayu/build/system/${SYSTEM}.scm; then
 			echo -e "--> [${GREEN}Jayu${CLEAR}] Finished reconfiguring Guix System"
 		fi
 	}
