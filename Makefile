@@ -43,8 +43,13 @@ clean:
 .ONESHELL:
 --pull: --tangle-system
 	@{ \
-		echo -e "--> [${GREEN}Jayu${CLEAR}] Copying Guix channels"
-		mv ./jayu/build/channels.scm ${XDG_CONFIG_HOME}/guix/channels.scm
+		GUIX_CONFIG_DIR="${XDG_CONFIG_HOME:-/home/$USER}/guix"
+		if [[ ! -d "${GUIX_CONFIG_DIR}" ]]; then
+			echo -e "--> [${GREEN}Jayu${CLEAR}] Creating ${GUIX_CONFIG_DIR}" 
+			mkdir -p "${GUIX_CONFIG_DIR}"
+		fi
+		echo -e "--> [${GREEN}Jayu${CLEAR}] Copying Guix channels
+		mv ./jayu/build/channels.scm ${GUIX_CONFIG_DIR}/channels.scm
 		echo -e "--> [${GREEN}Jayu${CLEAR}] Pulling Guix channels"
 		guix pull
 		echo -e "--> [${GREEN}Jayu${CLEAR}] Pulled Guix channels"
