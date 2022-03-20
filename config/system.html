@@ -1,0 +1,1072 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2022-03-21 Mon 03:56 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Guix System Configuration</title>
+<meta name="author" content="nouun" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+</style>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Guix System Configuration</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org702ca8c">1. Guix Channels</a>
+<ul>
+<li><a href="#orge7be3da">1.1. nonguix</a></li>
+<li><a href="#org7e3221c">1.2. rde</a></li>
+<li><a href="#org306ae2c">1.3. Base Channels</a></li>
+</ul>
+</li>
+<li><a href="#orgcaa52c6">2. Base System</a>
+<ul>
+<li><a href="#orgf3cf98e">2.1. Packages</a></li>
+<li><a href="#orgfaaef73">2.2. Services</a></li>
+<li><a href="#org3bfce78">2.3. Users</a></li>
+<li><a href="#org8453ca4">2.4. Base System</a></li>
+</ul>
+</li>
+<li><a href="#org77a74ca">3. Machines</a>
+<ul>
+<li><a href="#org8d8b1d4">3.1. Verrb (MacBook Pro)</a>
+<ul>
+<li><a href="#org4b914ea">3.1.1. Packages</a></li>
+<li><a href="#org6f08e8c">3.1.2. Services</a></li>
+<li><a href="#org1468304">3.1.3. System</a></li>
+</ul>
+</li>
+<li><a href="#org050f3d1">3.2. Pronouun (Server)</a>
+<ul>
+<li><a href="#org915dec4">3.2.1. Packages</a></li>
+<li><a href="#org3f6821a">3.2.2. Services</a></li>
+<li><a href="#org5a023bc">3.2.3. Users</a></li>
+<li><a href="#org66608fb">3.2.4. System</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org702ca8c" class="outline-2">
+<h2 id="org702ca8c"><span class="section-number-2">1.</span> Guix Channels</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+Guix uses <a href="https://guix.gnu.org/manual/en/html_node/Channels.html">channels</a>
+which are basically git repositories containing Guile files
+defining Guix packages that can be installed on your system.
+</p>
+</div>
+
+
+<div id="outline-container-orge7be3da" class="outline-3">
+<h3 id="orge7be3da"><span class="section-number-3">1.1.</span> nonguix</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+As my current laptop uses a WiFi chip which doesn't have a
+supported libre driver and Guix is a
+<a href="https://www.gnu.org/distros/free-system-distribution-guidelines.html">free system</a>
+so we have to add the
+<a href="https://gitlab.com/nonguix/nonguix">nonguix</a> channel to use the non-free Linux kernel.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(define nonguix
+  (channel
+    (name 'nonguix)
+    (url "https://gitlab.com/nonguix/nonguix")
+    (introduction
+      (make-channel-introduction
+	"897c1a470da759236cc11798f4e0a5f7d4d59fbc"
+	(openpgp-fingerprint
+	  "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5")))))
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org7e3221c" class="outline-3">
+<h3 id="org7e3221c"><span class="section-number-3">1.2.</span> rde</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+<a href="https://git.sr.ht/~abcdw/rde">rde</a> is an extension on top of Guix home which
+adds additional services for configuring the home environment
+and operating system.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(define rde
+  (channel
+    (name 'rde)
+    (url "https://git.sr.ht/~abcdw/rde")
+    (introduction
+      (make-channel-introduction
+	"257cebd587b66e4d865b3537a9a88cccd7107c95"
+	(openpgp-fingerprint
+	  "2841 9AC6 5038 7440 C7E9  2FFA 2208 D209 58C1 DEB0")))))
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org306ae2c" class="outline-3">
+<h3 id="org306ae2c"><span class="section-number-3">1.3.</span> Base Channels</h3>
+<div class="outline-text-3" id="text-1-3">
+<p>
+Return all the channels including the base channels which has
+the main Guix channel.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(cons* nonguix
+       rde
+       %default-channels)
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgcaa52c6" class="outline-2">
+<h2 id="orgcaa52c6"><span class="section-number-2">2.</span> Base System</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+This configuration is (will be) shared between different
+computers and as such they share the same base services,
+packages, and system.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(define-module (jayu build system base)
+  #:use-module (gnu)
+  #:use-module (gnu packages)
+  #:use-module (gnu system)
+  #:use-module (gnu packages bash)
+  #:use-module (gnu packages shells))
+</pre>
+</div>
+</div>
+
+
+<div id="outline-container-orgf3cf98e" class="outline-3">
+<h3 id="orgf3cf98e"><span class="section-number-3">2.1.</span> Packages</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+Define some basic system agnostic packages to include in all
+machines.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(define-public jayu-base-packages
+  (append
+    (map (compose list specification-&gt;package+output)
+    '("curl" "dbus" "emacs" "gash" "git" "gnupg"
+      "guile-readline" "ncurses" "nss-certs" "openssh"
+      "wget" "vim" "xdg-user-dirs" "xdg-utils"))
+    %base-packages))
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgfaaef73" class="outline-3">
+<h3 id="orgfaaef73"><span class="section-number-3">2.2.</span> Services</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+Define a service which adds coreutils to <code>/usr/bin/env</code>,
+Bash to <code>/bin/bash</code>, and Dash to <code>/bin/sh</code>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(define-public jayu-file-services
+  (list
+    (extra-special-file "/usr/bin/env"
+			(file-append coreutils "/usr/bin/env"))
+    (extra-special-file "/bin/bash"
+			(file-append bash "/bin/bash"))
+    (extra-special-file "/bin/sh"
+			(file-append dash "/bin/sh"))))
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org3bfce78" class="outline-3">
+<h3 id="org3bfce78"><span class="section-number-3">2.3.</span> Users</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+Define a list of users which will be on all machines.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(define jayu-users
+  (list
+    (user-account
+     (name "nouun")
+     (comment "nouun")
+     (home-directory "/home/nouun")
+     (group "users")
+     (supplementary-groups
+       '("wheel" "netdev" "audio" "video"))
+     (shell (file-append bash "/bin/bash")))))
+
+(define-public jayu-base-users
+  (append
+     jayu-users
+     %base-user-accounts))
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org8453ca4" class="outline-3">
+<h3 id="org8453ca4"><span class="section-number-3">2.4.</span> Base System</h3>
+<div class="outline-text-3" id="text-2-4">
+<p>
+Define a base system which is inherited and updated in each
+specific machine configuration.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(define-public jayu-base-system
+  (operating-system
+    (locale "en_NZ.utf8")
+    (timezone "Pacific/Auckland")
+    (host-name "guix")
+
+    (users jayu-base-users)
+    (packages jayu-base-packages)
+    (services jayu-file-services)
+
+    (bootloader
+      (bootloader-configuration
+	(bootloader grub-efi-bootloader)
+	(targets (list "/boot/efi"))))
+
+    ;; Guix requires file-system to be defined to create an operating-system
+    ;; so pass through a dummy file system which will be overriden in each
+    ;; machine configuration.
+    (file-systems
+      (cons* (file-system
+	       (mount-point "/")
+	       (device "none")
+	       (type "ext4")
+	       (check? #f))
+	     %base-file-systems))))
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org77a74ca" class="outline-2">
+<h2 id="org77a74ca"><span class="section-number-2">3.</span> Machines</h2>
+<div class="outline-text-2" id="text-3">
+</div>
+<div id="outline-container-org8d8b1d4" class="outline-3">
+<h3 id="org8d8b1d4"><span class="section-number-3">3.1.</span> Verrb (MacBook Pro)</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+Verrb is the configuration that is used on my Macbook Pro.
+Being an Apple Macbook, it uses a nonfree WiFi chip and as
+such, the non-free Linux kernel and b43 firmware are required
+to get WiFi working.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(define-module (jayu build system verrb)
+  #:use-module (gnu)
+  #:use-module (gnu packages bash)
+  #:use-module (gnu packages firmware)
+  #:use-module (gnu packages messaging)
+  #:use-module (gnu system)
+  #:use-module (gnu services desktop)
+  #:use-module (gnu services dns)
+  #:use-module (gnu services networking)
+  #:use-module (gnu services messaging)
+  #:use-module (gnu services sddm)
+  #:use-module (gnu services ssh)
+  #:use-module (gnu services web)
+  #:use-module (gnu services xorg)
+  #:use-module (guix store)
+  #:use-module (srfi srfi-1)
+
+  ; Nonfree packages: linux, b43-firmware 
+  #:use-module (nongnu packages linux)
+  #:use-module (jayu packages nonfree)
+
+  #:use-module (jayu build system base)
+  #:use-module (jayu packages display-managers)
+  #:use-module (jayu packages extras)
+  #:use-module (jayu packages rust-apps))
+</pre>
+</div>
+</div>
+
+
+<div id="outline-container-org4b914ea" class="outline-4">
+<h4 id="org4b914ea"><span class="section-number-4">3.1.1.</span> Packages</h4>
+<div class="outline-text-4" id="text-3-1-1">
+<p>
+Define packages specific to Verrb. <code>alsa-utils</code> and
+<code>pulseaudio</code> are used for audio. My AwesomeWM configuration
+requires an upstream version, therefore <code>awesome-git</code> is used
+instead of the packaged version included in the Guix repos.
+<code>verrb-sddm-theme</code> is the SDDM theme that I made and use.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(define verrb-packages
+  (append
+   (list awesome-git
+	 verrb-sddm-theme)
+   (map (compose list specification-&gt;package+output)
+	'("alsa-utils" "pulseaudio"))
+   jayu-base-packages))
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org6f08e8c" class="outline-4">
+<h4 id="org6f08e8c"><span class="section-number-4">3.1.2.</span> Services</h4>
+<div class="outline-text-4" id="text-3-1-2">
+</div>
+<ol class="org-ol">
+<li><a id="org2be2154"></a>SDDM<br />
+<div class="outline-text-5" id="text-3-1-2-1">
+<p>
+This will install SDDM as the display manager and use the
+verrb theme.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(define verrb-sddm-service
+  (service sddm-service-type
+	   (sddm-configuration
+	    (theme "verrb"))))
+</pre>
+</div>
+</div>
+</li>
+
+
+<li><a id="orgc51a4e0"></a>Bitlbee<br />
+<div class="outline-text-5" id="text-3-1-2-2">
+<p>
+Enable Bitlbee and install the Discord plugin so we can
+interact with Discord without having to use the bloated
+electron client.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(define verrb-bitlbee-service
+  (service bitlbee-service-type
+	   (bitlbee-configuration
+	     (plugins
+	       (list bitlbee-discord)))))
+</pre>
+</div>
+</div>
+</li>
+
+
+<li><a id="orgd05bc24"></a>Desktop Services<br />
+<div class="outline-text-5" id="text-3-1-2-3">
+<p>
+Modify the default desktop services to do the following:
+</p>
+
+<ol class="org-ol">
+<li>Remove GDM as SDDM is used instead.</li>
+<li>Set Guix to always use 4 cores.</li>
+<li>Stop network-manager from modifying /etc/resolve.conf</li>
+</ol>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(define verrb-desktop-services
+   (modify-services
+     (remove (lambda (service)
+	      (eq? (service-kind service) gdm-service-type))
+	 %desktop-services)
+
+     (guix-service-type
+       config =&gt; (guix-configuration
+		  (inherit config)
+		  (extra-options '("--max-job=4"))))
+
+     (network-manager-service-type
+       config =&gt; (network-manager-configuration
+		  (inherit config)
+		  (dns "none")))))
+</pre>
+</div>
+</div>
+</li>
+
+
+<li><a id="org376a866"></a>Verrb Services<br />
+<div class="outline-text-5" id="text-3-1-2-4">
+<p>
+Append all services into a single list.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(define verrb-services
+  (append (list verrb-sddm-service
+		verrb-bitlbee-service)
+	  verrb-desktop-services
+	  jayu-file-services))
+</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+
+
+<div id="outline-container-org1468304" class="outline-4">
+<h4 id="org1468304"><span class="section-number-4">3.1.3.</span> System</h4>
+<div class="outline-text-4" id="text-3-1-3">
+</div>
+<ol class="org-ol">
+<li><a id="org2594ce9"></a>File System<br />
+<div class="outline-text-5" id="text-3-1-3-1">
+<p>
+Mount root and boot partitions.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(define verrb-file-system
+  (cons* (file-system
+	   (mount-point "/")
+	   (device
+	     (uuid "e66d5096-1a1a-420d-92f0-b01cf7d103ea"
+		   'ext4))
+	   (type "ext4"))
+	 (file-system
+	   (mount-point "/boot/efi")
+	   (device (uuid "A23F-3C5F" 'fat32))
+	   (type "vfat"))
+	 %base-file-systems))
+</pre>
+</div>
+</div>
+</li>
+
+
+<li><a id="orgae04204"></a>System<br />
+<div class="outline-text-5" id="text-3-1-3-2">
+<p>
+Return a new operating system which inherits the
+<code>jayu-base-system</code> created in the base configuration and
+passes through the variables we've already defined. As
+mentioned at the start, this machine requires the
+non-free Linux kernel and b43-firmware so we also set
+those.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(operating-system
+  (inherit jayu-base-system)
+  (host-name "verrb")
+  (users jayu-base-users)
+  (file-systems verrb-file-system)
+
+  (packages verrb-packages)
+  (services verrb-services)
+
+  (kernel linux)
+  (firmware (list b43-firmware)))
+</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+
+
+<div id="outline-container-org050f3d1" class="outline-3">
+<h3 id="org050f3d1"><span class="section-number-3">3.2.</span> Pronouun (Server)</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+Pronouun is the configuration that is used on the server which
+hosts my website and git frontend.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(define-module (jayu build system pronouun)
+  #:use-module (gnu)
+  #:use-module (gnu packages bash)
+  #:use-module (gnu packages firmware)
+  #:use-module (gnu packages messaging)
+  #:use-module (gnu system)
+  #:use-module (gnu services dns)
+  #:use-module (gnu services networking)
+  #:use-module (gnu services messaging)
+  #:use-module (gnu services ssh)
+  #:use-module (gnu services web)
+  #:use-module (guix store)
+  #:use-module (srfi srfi-1)
+  #:use-module (jayu build system base))
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org915dec4" class="outline-4">
+<h4 id="org915dec4"><span class="section-number-4">3.2.1.</span> Packages</h4>
+<div class="outline-text-4" id="text-3-2-1">
+<p>
+Define packages specific to Pronouun.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(use-package-modules certs tls)
+
+(define pronouun-packages
+  (append
+   (list nss-certs
+	 certbot)
+   jayu-base-packages))
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org3f6821a" class="outline-4">
+<h4 id="org3f6821a"><span class="section-number-4">3.2.2.</span> Services</h4>
+<div class="outline-text-4" id="text-3-2-2">
+<p>
+Mainly just git and website services
+</p>
+</div>
+
+<ol class="org-ol">
+<li><a id="orgfd7a31f"></a>Git Daemon<br />
+<div class="outline-text-5" id="text-3-2-2-1">
+<p>
+Git Daemon
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">  (use-service-modules version-control)
+
+  (define pronouun-git-daemon-service
+    (service git-daemon-service-type))
+;	     (git-daemon-configuration)))
+;	      (base-path "/home/git/repositories/"))))
+</pre>
+</div>
+</div>
+</li>
+
+
+<li><a id="orgc6200be"></a>FastCGI<br />
+<div class="outline-text-5" id="text-3-2-2-2">
+<p>
+Fast CGI
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(define pronouun-fcgi-service
+  (service fcgiwrap-service-type))
+</pre>
+</div>
+</div>
+</li>
+
+
+<li><a id="org8a4aea7"></a>Cgit<br />
+<div class="outline-text-5" id="text-3-2-2-3">
+<p>
+Git frontend
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(use-service-modules cgit)
+(use-package-modules version-control)
+
+(define (cert-path host file)
+  (format #f "/etc/letsencrypt/live/~a/~a.pem"
+	  host (symbol-&gt;string file)))
+
+(define pronouun-cgit-nginx-configuration
+  (nginx-server-configuration
+   (root cgit)
+   (server-name '("git.nouun.dev"
+		  "www.git.nouun.dev"))
+   (listen '("80"))
+   (locations
+    (list
+     (nginx-location-configuration
+      (uri "@cgit")
+      (body '("fastcgi_param SCRIPT_FILENAME $document_root/lib/cgit/cgit.cgi;"
+	      "fastcgi_param PATH_INFO $uri;"
+	      "fastcgi_param QUERY_STRING $args;"
+	      "fastcgi_param HTTP_HOST $server_name;"
+	      "fastcgi_pass 127.0.0.1:9000;")))))
+   (try-files (list "$uri" "@cgit"))
+   (ssl-certificate (cert-path "git.nouun.dev"
+		    'fullchain))
+   (ssl-certificate-key (cert-path "git.karl.hallsby.com"
+			'privkey))))
+
+(define pronouun-cgit-service
+  (service cgit-service-type
+	   (cgit-configuration
+	    (enable-commit-graph? #t)
+	    (enable-html-serving? #t)
+	    (repository-directory "/home/cgit/repositories")
+	    (nocache? #t)
+	    (nginx
+	     (list
+	       pronouun-cgit-nginx-configuration)))))
+</pre>
+</div>
+</div>
+</li>
+
+<li><a id="orgbae6115"></a>Nginx<br />
+<div class="outline-text-5" id="text-3-2-2-4">
+<p>
+nginx
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(use-service-modules web)
+
+(define pronouun-website-nginx-configuration
+  (nginx-server-configuration
+   (server-name '("nouun.dev"
+		  "www.nouun.dev"))
+   (listen '("80"))))
+   ;(ssl-certificate (cert-path "git.nouun.dev"
+   ;                 'fullchain))
+   ;(ssl-certificate-key (cert-path "git.karl.hallsby.com"
+   ;                     'privkey))))
+
+(define pronouun-nginx-service
+  (service nginx-service-type
+	   (nginx-configuration
+	    (server-blocks
+	     (list pronouun-website-nginx-configuration)))))
+</pre>
+</div>
+</div>
+</li>
+
+
+<li><a id="org2b76b32"></a>Certbot<br />
+<div class="outline-text-5" id="text-3-2-2-5">
+<p>
+certbot
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(use-service-modules certbot)
+
+(define pronouun-certbot-nginx-deploy-hook
+  (program-file
+   "nginx-deploy-hook"
+    #~(let ((pid (call-with-input-file "/var/run/nginx/pid" read)))
+	(kill pid SIGHUP))))
+
+(define pronouun-certbot-service
+  (service certbot-service-type
+	   (certbot-configuration
+	    (email "me@nouun.dev")
+	    (certificates
+	     (list
+	      (certificate-configuration
+	       (name "Website")
+	       (domains '("nouun.dev"
+			  "www.nouun.dev"))
+	       (deploy-hook
+		  pronouun-certbot-nginx-deploy-hook))
+	      (certificate-configuration
+	       (name "Website")
+	       (domains '("git.nouun.dev"
+			  "www.git.nouun.dev"))
+	       (deploy-hook
+		  pronouun-certbot-nginx-deploy-hook)))))))
+</pre>
+</div>
+</div>
+</li>
+
+
+<li><a id="org3996a35"></a>DHCP<br />
+<div class="outline-text-5" id="text-3-2-2-6">
+<p>
+dhcp
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(use-service-modules networking)
+
+(define pronouun-dhcp-service
+  (service dhcp-client-service-type))
+</pre>
+</div>
+</div>
+</li>
+
+<li><a id="orgf06094a"></a>OpenSSH<br />
+<div class="outline-text-5" id="text-3-2-2-7">
+<p>
+I use <code>openssh-sans-x</code> as there is no X11 server setup and
+as such, OpenSSH doesn't need X11 support.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(use-service-modules ssh)
+(use-package-modules ssh)
+
+(define pronouun-ssh-service
+  (service openssh-service-type
+	   (openssh-configuration
+	    (openssh openssh-sans-x)
+	    (password-authentication? #t)
+	    (permit-root-login #f))))
+</pre>
+</div>
+</div>
+</li>
+
+
+<li><a id="orge3d3460"></a>Base Services<br />
+<div class="outline-text-5" id="text-3-2-2-8">
+<p>
+Modify the default base services to do the following:
+</p>
+
+<ol class="org-ol">
+<li>Nothing for now</li>
+</ol>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(define pronouun-base-services
+  (append
+   jayu-file-services
+   %base-services))
+</pre>
+</div>
+</div>
+</li>
+
+
+<li><a id="orgbfada85"></a>Pronouun Services<br />
+<div class="outline-text-5" id="text-3-2-2-9">
+<p>
+Append all services into a single list.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(define pronouun-services
+  (append (list pronouun-git-daemon-service
+		pronouun-fcgi-service
+		pronouun-cgit-service
+		pronouun-nginx-service
+		pronouun-certbot-service
+		pronouun-dhcp-service
+		pronouun-ssh-service)
+	  pronouun-base-services
+	  jayu-file-services))
+</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+
+
+<div id="outline-container-org5a023bc" class="outline-4">
+<h4 id="org5a023bc"><span class="section-number-4">3.2.3.</span> Users</h4>
+<div class="outline-text-4" id="text-3-2-3">
+<p>
+Users
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(define pronouun-users
+  (list
+    (user-account
+     (name "git")
+     (comment "git")
+     (home-directory "/home/git")
+     (group "users")
+     (supplementary-groups
+       '("wheel" "netdev" "audio" "video"))
+     (shell (file-append bash "/bin/bash")))))
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org66608fb" class="outline-4">
+<h4 id="org66608fb"><span class="section-number-4">3.2.4.</span> System</h4>
+<div class="outline-text-4" id="text-3-2-4">
+</div>
+<ol class="org-ol">
+<li><a id="orgd954e45"></a>File System<br />
+<div class="outline-text-5" id="text-3-2-4-1">
+<p>
+Mount root and boot partitions.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(define pronouun-swap
+  (list (uuid "61c2aeba-85ed-4e02-a227-027ecbd115f0")))
+
+(define pronouun-file-system
+  (cons* (file-system
+	   (mount-point "/")
+	   (device
+	     (uuid "b2b07395-cfd5-4133-86e2-5538eb0c0406"
+		   'ext4))
+	   (type "ext4"))
+	 %base-file-systems))
+</pre>
+</div>
+</div>
+</li>
+
+
+<li><a id="org7966304"></a>System<br />
+<div class="outline-text-5" id="text-3-2-4-2">
+<p>
+Test
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(operating-system
+    (inherit jayu-base-system)
+    (host-name "pronouun")
+    (users pronouun-users)
+    (file-systems pronouun-file-system)
+
+    (packages pronouun-packages)
+    (services pronouun-services)
+
+    (bootloader
+      (bootloader-configuration
+	(bootloader grub-bootloader)
+	(targets (list "/boot/vda")))))
+</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: nouun</p>
+<p class="date">Created: 2022-03-21 Mon 03:56</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

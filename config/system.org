@@ -390,9 +390,9 @@ Git Daemon
   (use-service-modules version-control)
   
   (define pronouun-git-daemon-service
-    (service git-daemon-service
-	     (git-daemon-configuration
-	      (base-path "/home/git/repositories/"))))
+    (service git-daemon-service-type))
+;	     (git-daemon-configuration)))
+;	      (base-path "/home/git/repositories/"))))
 #+END_SRC
 
 
@@ -617,11 +617,16 @@ Test
 
 #+BEGIN_SRC scheme :tangle ../jayu/build/system/pronouun.scm
   (operating-system
-    (inherit jayu-base-system)
-    (host-name "pronouun")
-    (users pronouun-users)
-    (file-systems pronouun-file-system)
-  
-    (packages pronouun-packages)
-    (services pronouun-services))
+      (inherit jayu-base-system)
+      (host-name "pronouun")
+      (users pronouun-users)
+      (file-systems pronouun-file-system)
+
+      (packages pronouun-packages)
+      (services pronouun-services)
+
+      (bootloader
+	(bootloader-configuration
+	  (bootloader grub-bootloader)
+	  (targets (list "/boot/vda")))))
 #+END_SRC
