@@ -169,7 +169,7 @@ specific machine configuration.
 * Machines
 
 
-** Verrb
+** Verrb (MacBook Pro)
 
 Verrb is the configuration that is used on my Macbook Pro.
 Being an Apple Macbook, it uses a nonfree WiFi chip and as
@@ -340,3 +340,282 @@ those.
     (firmware (list b43-firmware)))
 #+END_SRC
 
+
+** Pronouun (Server)
+
+Pronouun is the configuration that is used on the server which
+hosts my website and git frontend.
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/pronouun.scm
+  (define-module (jayu build system pronouun)
+    #:use-module (gnu)
+    #:use-module (gnu packages bash)
+    #:use-module (gnu packages firmware)
+    #:use-module (gnu packages messaging)
+    #:use-module (gnu system)
+    #:use-module (gnu services dns)
+    #:use-module (gnu services networking)
+    #:use-module (gnu services messaging)
+    #:use-module (gnu services ssh)
+    #:use-module (gnu services web)
+    #:use-module (guix store)
+    #:use-module (srfi srfi-1))
+#+END_SRC
+
+*** Packages
+
+Define packages specific to Pronouun.
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/pronouun.scm
+  (define pronouun-packages
+    (append
+     (list nss-certs
+           certbot)
+     jayu-base-packages))
+#+END_SRC
+
+
+*** Services
+
+Mainly just git and website services
+
+**** Git Daemon
+
+Git Daemon
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/pronouun.scm
+  (use-service-modules version-control)
+  
+  (define pronouun-git-daemon-service
+    (service git-daemon-service
+	     (git-daemon-configuration
+	      (base-path "/home/git/repositories/"))))
+#+END_SRC
+
+
+**** FastCGI
+
+Fast CGI
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/pronouun.scm
+  (define pronouun-fcgi-service
+    (service fcgiwrap-service-type))
+#+END_SRC
+
+
+**** Cgit
+
+Git frontend
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/pronouun.scm
+  (use-service-modules cgit)
+
+  (define (cert-path host file)
+    (format #f "/etc/letsencrypt/live/~a/~a.pem"
+            host (symbol->string file)))
+  
+  (define pronouun-cgit-nginx-configuration
+    (nginx-server-configuration
+     (root cgit)
+     (server-name '("git.nouun.dev"
+		    "www.git.nouun.dev"))
+     (listen '("80"))
+     (locations
+      (list
+       (nginx-location-configuration
+	(uri "@cgit")
+	(body '("fastcgi_param SCRIPT_FILENAME $document_root/lib/cgit/cgit.cgi;"
+		"fastcgi_param PATH_INFO $uri;"
+		"fastcgi_param QUERY_STRING $args;"
+		"fastcgi_param HTTP_HOST $server_name;"
+		"fastcgi_pass 127.0.0.1:9000;")))))
+     (try-files (list "$uri" "@cgit"))
+     (ssl-certificate (cert-path "git.nouun.dev"
+                      'fullchain))
+     (ssl-certificate-key (cert-path "git.karl.hallsby.com"
+                          'privkey))))
+
+  (define pronouun-cgit-service
+    (service cgit-service-type
+	     (cgit-configuration
+	      (enable-commit-graph? #t)
+	      (enable-html-serving? #t)
+	      (repository-directory "/home/cgit/repositories")
+	      (nocache? #t)
+	      (nginx
+		()))))
+#+END_SRC
+
+**** Nginx
+
+nginx
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/pronouun.scm
+  (use-service-modules web)
+
+  (define pronouun-website-nginx-configuration
+    (nginx-server-configuration
+     (root cgit)
+     (server-name '("nouun.dev"
+		    "www.nouun.dev"))
+     (listen '("80"))))
+     ;(ssl-certificate (cert-path "git.nouun.dev"
+     ;                 'fullchain))
+     ;(ssl-certificate-key (cert-path "git.karl.hallsby.com"
+     ;                     'privkey))))
+
+  (define pronouun-nginx-service
+    (service nginx-service-type
+	     (nginx-configuration
+	      (server-blocks
+	       (list pronouun-website-nginx-configuration)))))
+#+END_SRC
+
+
+**** Certbot
+
+certbot
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/pronouun.scm
+  (use-service-modules certbot)
+
+  (define pronouun-certbot-nginx-deploy-hook
+    (program-file
+     "nginx-deploy-hook"
+      #~(let ((pid (call-with-input-file "/var/run/nginx/pid" read)))
+          (kill pid SIGHUP))))
+
+  (define pronouun-certbot-service
+    (service certbot-service-type
+	     (certbot-configuration
+	      (email "me@nouun.dev")
+	      (certificates
+	       (list
+		(certificate-configuration
+		 (name "Website")
+		 (domains '("nouun.dev"
+			    "www.nouun.dev"))
+                 (deploy-hook
+                    pronouun-certbot-nginx-deploy-hook))
+		(certificate-configuration
+		 (name "Website")
+		 (domains '("git.nouun.dev"
+			    "www.git.nouun.dev"))
+                 (deploy-hook
+                    pronouun-certbot-nginx-deploy-hook)))))))
+#+END_SRC
+
+
+**** DHCP
+
+dhcp
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/pronouun.scm
+  (define pronouun-dhcp-service
+    (service dhcp-service-type))
+#+END_SRC
+
+**** OpenSSH
+
+I use =openssh-sans-x= as there is no X11 server setup and
+as such, OpenSSH doesn't need X11 support.
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/pronouun.scm
+  (use-service-modules ssh)
+  (use-package-modules ssh)
+  
+  (define pronouun-ssh-service
+    (service openssh-service-type
+             (openssh-configuration
+              (openssh openssh-sans-x)
+              (password-authentication? #t)
+              (perit-root-login? #f))))
+#+END_SRC
+
+
+**** Base Services
+
+Modify the default base services to do the following:
+
+1) Nothing for now
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/pronouun.scm
+  (define pronouun-base-services
+    (append
+     jayu-file-services
+     %base-services))
+#+END_SRC
+
+
+**** Pronouun Services
+
+Append all services into a single list.
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/pronouun.scm
+  (define pronouun-services
+    (append (list pronouun-git-daemon-service
+                  pronouun-fcgi-service
+                  pronouun-cgit-service
+                  pronouun-nginx-service
+                  pronouun-certbot-service
+                  pronouun-dhcp-service
+                  pronouun-ssh-service)
+            pronouun-base-services
+            jayu-file-services))
+#+END_SRC
+
+
+*** Users
+
+Users
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/pronouun.scm
+  (define pronouun-users
+    (list
+      (user-account
+       (name "git")
+       (comment "git")
+       (home-directory "/home/git")
+       (group "users")
+       (supplementary-groups
+	 '("wheel" "netdev" "audio" "video"))
+       (shell (file-append bash "/bin/bash")))))
+#+END_SRC
+
+
+*** System
+
+
+**** File System
+
+Mount root and boot partitions.
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/pronouun.scm
+  (define pronouun-swap
+    (list (uuid "61c2aeba-85ed-4e02-a227-027ecbd115f0")))
+
+  (define pronouun-file-system
+    (cons* (file-system
+	     (mount-point "/")
+	     (device
+	       (uuid "b2b07395-cfd5-4133-86e2-5538eb0c0406"
+		     'ext4))
+	     (type "ext4"))
+	   %base-file-systems))
+#+END_SRC
+
+
+**** System
+
+Test
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/pronouun.scm
+  (operating-system
+    (inherit jayu-base-system)
+    (host-name "pronouun")
+    (users pronouun-users)
+    (file-systems pronouu-file-system)
+  
+    (packages pronouun-packages)
+    (services pronouun-services))
+#+END_SRC

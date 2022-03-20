@@ -197,37 +197,37 @@ Append all the packages into one list.
 *** Direnv
 
 #+BEGIN_SRC scheme :tangle ../jayu/build/home/nouun.scm
-     (use-modules (gnu)
-                  (gnu packages shellutils)
-                  (gnu home services)
-                  (gnu home-services base)
-                  (gnu home-services shellutils)
-                  (guix gexp))
+  (use-modules (gnu)
+              (gnu packages shellutils)
+              (gnu home services)
+              (gnu home-services base)
+              (gnu home-services shellutils)
+              (guix gexp))
 
 
-   (define-public direnv-services
-     (list
-       (simple-service 'direnv-service
-                       home-files-service-type
-                       `(("config/direnv/direnvrc"
-                          ,(plain-file "direnverc" "\
-   use_guix() {
-     local cache_dir=\"$(direnv_layout_dir)/.guix-profile\"
-     if [[ -e \"$cache_dir/etc/profile\" ]]; then
-       # shellcheck disable=SC1091
-       source \"$cache_dir/etc/profile\"
-     else
-       mkdir -p \"$(direnv_layout_dir)\"
-       eval \"$(guix environment --root=\"$cache_dir\" \"$@\" --search-paths)\"
-     fi
-   }
-   "))))
+ (define-public direnv-services
+   (list
+     (simple-service 'direnv-service
+                     home-files-service-type
+                     `(("config/direnv/direnvrc"
+                        ,(plain-file "direnverc" "\
+ use_guix() {
+   local cache_dir=\"$(direnv_layout_dir)/.guix-profile\"
+   if [[ -e \"$cache_dir/etc/profile\" ]]; then
+     # shellcheck disable=SC1091
+     source \"$cache_dir/etc/profile\"
+   else
+     mkdir -p \"$(direnv_layout_dir)\"
+     eval \"$(guix environment --root=\"$cache_dir\" \"$@\" --search-paths)\"
+   fi
+ }
+ "))))
 
-       (service home-zsh-direnv-service-type)
-       (service home-bash-direnv-service-type)
+     (service home-zsh-direnv-service-type)
+     (service home-bash-direnv-service-type)
 
-       (home-generic-service 'direnv-packages
-         #:packages (list direnv))))
+     (home-generic-service 'direnv-packages
+       #:packages (list direnv))))
 #+END_SRC
 
 
