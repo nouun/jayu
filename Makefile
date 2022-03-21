@@ -56,7 +56,7 @@ clean:
 	}
 
 .ONESHELL:
---reconfigure-system: --tangle-system
+--reconfigure-system: --tangle-system --remove-channels
 	@{ \
 		echo -e "--> [${GREEN}Jayu${CLEAR}] Reconfiguring Guix System"
 		if sudo -E guix system -L ./ reconfigure ./jayu/build/system/${SYSTEM}.scm; then
@@ -65,11 +65,21 @@ clean:
 	}
 
 .ONESHELL:
---reconfigure-home: --tangle-home
+--reconfigure-home: --tangle-home --remove-channels
 	@{ \
 		echo -e "--> [${GREEN}Jayu${CLEAR}] Reconfiguring Guix Home"
 		if guix home -L ./ reconfigure ./jayu/build/home/${USER}.scm; then
 			echo -e "--> [${GREEN}Jayu${CLEAR}] Finished reconfiguring Guix Home"
+		fi
+	}
+
+# Remove channels.scm file to stop erroring when building system or home
+.ONESHELL:
+--remove-channels:
+	@{ \
+		if [[ -f ./jayu/build/channels.scm ]]; then
+			echo -e "--> [${GREEN}Jayu${CLEAR}] Removing unnecessary channels.scm"
+			rm ./jayu/build/channels.scm
 		fi
 	}
 
