@@ -29,6 +29,16 @@ so we have to add the
 	    "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5")))))
 #+END_SRC
 
+Also add the [[https://substitutes.nonguix.org/signing-key.pub][signing key]] to sign the Nonguix substitute
+server.
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/nonguix-key.pub
+  (public-key
+   (ecc
+    (curve Ed25519)
+    (q #C1FD53E5D4CE971933EC50C9F307AE2171A2D3B52C804642A7A35F84F3A4EA98#)))
+#+END_SRC
+
 
 ** rde
 
@@ -83,13 +93,13 @@ Define some basic system agnostic packages to include in all
 machines.
 
 #+BEGIN_SRC scheme :tangle ../jayu/build/system/base.scm
-  (define-public jayu-base-packages
-    (append
-      (map (compose list specification->package+output)
-      '("curl" "dbus" "emacs" "gash" "git" "gnupg"
-	"guile-readline" "ncurses" "nss-certs" "openssh"
-	"wget" "vim" "xdg-user-dirs" "xdg-utils"))
-      %base-packages))
+    (define-public jayu-base-packages
+      (append
+	(map (compose list specification->package+output)
+	'("curl" "dbus" "emacs" "gash" "git" "gnupg"
+	  "guile-readline" "make" "ncurses" "nss-certs"
+	  "openssh" "wget" "vim" "xdg-user-dirs" "xdg-utils"))
+	%base-packages))
 #+END_SRC
 
 
@@ -124,7 +134,7 @@ Define a list of users which will be on all machines.
        (group "users")
        (supplementary-groups
 	 '("wheel" "netdev" "audio" "video"))
-       (shell (file-append bash "/bin/bash")))))
+       (shell (file-append scsh "/bin/scsh")))))
 
   (define-public jayu-base-users
     (append
@@ -192,6 +202,7 @@ to get WiFi working.
     #:use-module (gnu services web)
     #:use-module (gnu services xorg)
     #:use-module (guix store)
+    #:use-module (guix gexp)
     #:use-module (srfi srfi-1)
 
     ; Nonfree packages: linux, b43-firmware 
@@ -262,6 +273,10 @@ Modify the default desktop services to do the following:
 2) Set Guix to always use 4 cores.
 3) Stop network-manager from modifying /etc/resolve.conf
 
+To use the Nonguix substitute server, we need to modify
+the guix service and add the substitute server as well as
+the signing key.
+
 #+BEGIN_SRC scheme :tangle ../jayu/build/system/verrb.scm
   (define verrb-desktop-services
      (modify-services
@@ -272,14 +287,19 @@ Modify the default desktop services to do the following:
        (guix-service-type
 	 config => (guix-configuration
 		    (inherit config)
-		    (extra-options '("--max-job=4"))))
+		    (extra-options '("--max-job=4"))
+                    (substitute-urls
+                     (append %default-substitute-urls
+                       (list "https://substitutes.nonguix.org")))
+                    (authorized-keys
+                     (append %default-authorized-guix-keys
+                       (list (local-file "../nonguix-key.pub"))))))
 
        (network-manager-service-type
 	 config => (network-manager-configuration
 		    (inherit config)
 		    (dns "none")))))
 #+END_SRC
-
 
 **** Verrb Services
 
@@ -628,5 +648,5 @@ Test
       (bootloader
 	(bootloader-configuration
 	  (bootloader grub-bootloader)
-	  (targets (list "/boot/vda")))))
+	  (targets (list "/dev/vda")))))
 #+END_SRC
