@@ -4,6 +4,7 @@
   #:use-module (guix download)
   #:use-module (guix git-download)
   #:use-module (guix packages)
+  #:use-module (guix gexp)
   #:use-module (guix utils)
   #:use-module (gnu packages)
   #:use-module (gnu packages compression)
@@ -32,7 +33,9 @@
              (file-name (git-file-name name version))
              (sha256
               (base32 "08wmljisa2dd1p2k57i7ahqb49ffyl3cqps5ggladx0lbqjm89dz"))
-             (patches '("jayu/patches/wezterm-fix-cargo-git.patch"))))
+             (patches
+	       (list
+		(local-file "../patches/wezterm-fix-cargo-git.patch")))))
     (build-system cargo-build-system)
     (inputs
      (list fontconfig zlib libx11 libxcb libssh2 libxkbcommon openssl

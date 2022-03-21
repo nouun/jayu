@@ -5,6 +5,7 @@
   #:use-module (gnu packages linux)
   #:use-module (guix licenses)
   #:use-module (guix packages)
+  #:use-module (guix gexp)
   #:use-module (guix utils)
   #:use-module (guix download)
   #:use-module (guix git-download)
@@ -24,7 +25,9 @@
               (sha256
                (base32
                 "1ki1f5fy3yrw843r697f8mqqdz0pbsbqnvg4yzkhibpn1lqqbsnn"))
-              (patches '("jayu/patches/b43-fwcutter-no-root-install.patch"))))
+              (patches
+		(list
+		  (local-file "../patches/b43-fwcutter-no-root-install.patch")))))
     (build-system gnu-build-system)
     (arguments
      `(#:tests? #f ; no tests
