@@ -230,7 +230,7 @@ instead of the packaged version included in the Guix repos.
   (define verrb-packages
     (append
      (list awesome-git
-	   verrb-sddm-theme)
+	   adverrb-sddm-theme)
      (map (compose list specification->package+output)
 	  '("alsa-utils" "pulseaudio"))
      jayu-base-packages))

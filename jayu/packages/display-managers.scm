@@ -8,19 +8,19 @@
   #:use-module (guix gexp)
   #:use-module (gnu packages))
 
-(define-public verrb-sddm-theme
+(define-public adverrb-sddm-theme
   (package
-    (name "verrb-sddm-theme")
+    (name "adverrb-sddm-theme")
     (version "0.1.2")
     (source (origin
               (method git-fetch)
               (uri (git-reference
-                    (url "https://github.com/nouun/sddm-verrb")
-                    (commit "6a118d02c68cc44ae70b4ef99b2340782618b625")))
+                    (url "https://github.com/nouun/sddm-adverrb")
+                    (commit "d229f0e1d028ebc5bafbb7fdaf4c730d8ddc8f79")))
               (file-name (git-file-name name version))
               (sha256
                (base32
-                "05qkqrzdw5bf2fj6qrcpd6rlbgg841qg9cpgmgk0dwhk8czxdaic"))))
+                "14vsl8cshl5hz8hvg6vwbbz16g1drjhgvv9xzc288wm2i1k9iz24"))))
     (build-system trivial-build-system)
     (arguments
      `(#:modules ((guix build utils))
@@ -31,8 +31,8 @@
                 (sddm-themes (string-append out "/share/sddm/themes")))
            (mkdir-p sddm-themes)
            (copy-recursively (assoc-ref %build-inputs "source")
-                             (string-append sddm-themes "/verrb"))))))
-    (home-page "https://github.com/nouun/sddm-verrb")
-    (synopsis "Verrb theme for SDDM")
-    (description "Verrb theme.")
+                             (string-append sddm-themes "/adverrb"))))))
+    (home-page "https://github.com/nouun/sddm-adverrb")
+    (synopsis "Adverrb theme for SDDM")
+    (description "Adverrb theme.")
     (license license:expat)))
