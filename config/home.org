@@ -41,10 +41,12 @@ General programs
 
 #+BEGIN_SRC scheme :tangle ../jayu/build/home/nouun.scm
   (define general-packages
-    (list->pkgs
-     `("qutebrowser" ;; Qutebrowser seems to have an issue loading GitHub.
-       "ungoogled-chromium"
-       "imagemagick")))
+    (append
+     (list qmk)
+     (list->pkgs
+      `("qutebrowser" ;; Qutebrowser seems to have an issue loading GitHub.
+        "ungoogled-chromium"
+        "imagemagick"))))
 #+END_SRC
 
 
