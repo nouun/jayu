@@ -113,10 +113,12 @@ Bash to =/bin/bash=, and Dash to =/bin/sh=.
     (list
       (extra-special-file "/usr/bin/env"
 			  (file-append coreutils "/usr/bin/env"))
+      (extra-special-file "/bin/zsh"
+			  (file-append zsh "/bin/zsh"))
       (extra-special-file "/bin/bash"
 			  (file-append bash "/bin/bash"))
       (extra-special-file "/bin/sh"
-			  (file-append dash "/bin/sh"))))
+			  (file-append dash "/bin/dash"))))
 #+END_SRC
 
 
@@ -134,7 +136,7 @@ Define a list of users which will be on all machines.
        (group "users")
        (supplementary-groups
 	 '("wheel" "netdev" "audio" "video"))
-       (shell (file-append scsh "/bin/scsh")))))
+       (shell (file-append bash "/bin/bash")))))
 
   (define-public jayu-base-users
     (append

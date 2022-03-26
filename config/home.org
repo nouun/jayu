@@ -16,8 +16,8 @@ desktop setups.
     #:use-module (gnu packages)
     #:use-module (jayu packages wm)
     #:use-module (jayu packages golang)
+    #:use-module (jayu packages hardware)
     #:use-module (jayu packages messaging))
-
 #+END_SRC
 
 
