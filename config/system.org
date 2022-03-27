@@ -188,8 +188,8 @@ Being an Apple Macbook, it uses a nonfree WiFi chip and as
 such, the non-free Linux kernel and b43 firmware are required
 to get WiFi working.
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/system/verrb.scm
-  (define-module (jayu build system verrb)
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/systems/verrb.scm
+  (define-module (jayu build system systems verrb)
     #:use-module (gnu)
     #:use-module (gnu packages bash)
     #:use-module (gnu packages firmware)
@@ -228,7 +228,7 @@ requires an upstream version, therefore =awesome-git= is used
 instead of the packaged version included in the Guix repos.
 =verrb-sddm-theme= is the SDDM theme that I made and use.
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/system/verrb.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/systems/verrb.scm
   (define verrb-packages
     (append
      (list awesome-git
@@ -246,7 +246,7 @@ instead of the packaged version included in the Guix repos.
 This will install SDDM as the display manager and use the
 verrb theme.
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/system/verrb.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/systems/verrb.scm
   (define verrb-sddm-service
     (service sddm-service-type
              (sddm-configuration
@@ -259,7 +259,7 @@ verrb theme.
 Setup the udev rules needed for flashing keyboards through
 QMK without needing to run as root every time.
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/system/verrb.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/systems/verrb.scm
   (define verrb-qmk-udev-service
     (udev-rules-service 'qmk
       (file->udev-rule
@@ -279,7 +279,7 @@ Enable Bitlbee and install the Discord plugin so we can
 interact with Discord without having to use the bloated
 electron client.
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/system/verrb.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/systems/verrb.scm
   (define verrb-bitlbee-service
     (service bitlbee-service-type
 	     (bitlbee-configuration
@@ -300,7 +300,7 @@ To use the Nonguix substitute server, we need to modify
 the guix service and add the substitute server as well as
 the signing key.
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/system/verrb.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/systems/verrb.scm
   (define verrb-desktop-services
      (modify-services
        (remove (lambda (service)
@@ -316,7 +316,7 @@ the signing key.
                        (list "https://substitutes.nonguix.org")))
                     (authorized-keys
                      (append %default-authorized-guix-keys
-                       (list (local-file "../nonguix-key.pub"))))))
+                       (list (local-file "../../nonguix-key.pub"))))))
 
        (network-manager-service-type
 	 config => (network-manager-configuration
@@ -328,7 +328,7 @@ the signing key.
 
 Append all services into a single list.
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/system/verrb.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/systems/verrb.scm
   (define verrb-services
     (append (list verrb-sddm-service
 		  verrb-qmk-udev-service
@@ -345,7 +345,7 @@ Append all services into a single list.
 
 Mount root and boot partitions.
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/system/verrb.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/systems/verrb.scm
   (define verrb-file-system
     (cons* (file-system
              (mount-point "/")
@@ -370,7 +370,7 @@ mentioned at the start, this machine requires the
 non-free Linux kernel and b43-firmware so we also set
 those.
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/system/verrb.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/systems/verrb.scm
   (operating-system
     (inherit jayu-base-system)
     (host-name "verrb")
@@ -390,8 +390,8 @@ those.
 Pronouun is the configuration that is used on the server which
 hosts my website and git frontend.
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/system/pronouun.scm
-  (define-module (jayu build system pronouun)
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/systems/pronouun.scm
+  (define-module (jayu build system systems pronouun)
     #:use-module (gnu)
     #:use-module (gnu packages bash)
     #:use-module (gnu packages firmware)
@@ -411,7 +411,7 @@ hosts my website and git frontend.
 
 Define packages specific to Pronouun.
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/system/pronouun.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/systems/pronouun.scm
   (use-package-modules certs tls)
   
   (define pronouun-packages
@@ -430,7 +430,7 @@ Mainly just git and website services
 
 Git Daemon
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/system/pronouun.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/systems/pronouun.scm
   (use-service-modules version-control)
   
   (define pronouun-git-daemon-service
@@ -444,7 +444,7 @@ Git Daemon
 
 Fast CGI
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/system/pronouun.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/systems/pronouun.scm
   (define pronouun-fcgi-service
     (service fcgiwrap-service-type))
 #+END_SRC
@@ -454,7 +454,7 @@ Fast CGI
 
 Git frontend
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/system/pronouun.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/systems/pronouun.scm
   (use-service-modules cgit)
   (use-package-modules version-control)
 
@@ -499,7 +499,7 @@ Git frontend
 
 nginx
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/system/pronouun.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/systems/pronouun.scm
   (use-service-modules web)
 
   (define pronouun-website-nginx-configuration
@@ -524,7 +524,7 @@ nginx
 
 certbot
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/system/pronouun.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/systems/pronouun.scm
   (use-service-modules certbot)
 
   (define pronouun-certbot-nginx-deploy-hook
@@ -558,7 +558,7 @@ certbot
 
 dhcp
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/system/pronouun.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/systems/pronouun.scm
   (use-service-modules networking)
   
   (define pronouun-dhcp-service
@@ -570,7 +570,7 @@ dhcp
 I use =openssh-sans-x= as there is no X11 server setup and
 as such, OpenSSH doesn't need X11 support.
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/system/pronouun.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/systems/pronouun.scm
   (use-service-modules ssh)
   (use-package-modules ssh)
   
@@ -589,7 +589,7 @@ Modify the default base services to do the following:
 
 1) Nothing for now
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/system/pronouun.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/systems/pronouun.scm
   (define pronouun-base-services
     (append
      jayu-file-services
@@ -601,7 +601,7 @@ Modify the default base services to do the following:
 
 Append all services into a single list.
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/system/pronouun.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/systems/pronouun.scm
   (define pronouun-services
     (append (list pronouun-git-daemon-service
                   pronouun-fcgi-service
@@ -619,7 +619,7 @@ Append all services into a single list.
 
 Users
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/system/pronouun.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/systems/pronouun.scm
   (define pronouun-users
     (list
       (user-account
@@ -640,7 +640,7 @@ Users
 
 Mount root and boot partitions.
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/system/pronouun.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/systems/pronouun.scm
   (define pronouun-swap
     (list (uuid "61c2aeba-85ed-4e02-a227-027ecbd115f0")))
 
@@ -659,7 +659,7 @@ Mount root and boot partitions.
 
 Test
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/system/pronouun.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/systems/pronouun.scm
   (operating-system
       (inherit jayu-base-system)
       (host-name "pronouun")

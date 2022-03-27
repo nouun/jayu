@@ -7,16 +7,8 @@
 nouun is my main user account which is used on my all my
 desktop setups.
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/home/nouun.scm
-  (define-module (jayu build home nouun)
-    #:use-module (gnu home)
-    #:use-module (gnu home services)
-    #:use-module (gnu home services shells)
-    #:use-module (gnu services)
-    #:use-module (gnu packages)
-    #:use-module (jayu packages wm)
-    #:use-module (jayu packages golang)
-    #:use-module (jayu packages messaging))
+#+BEGIN_SRC scheme :tangle ../jayu/build/home/users/nouun.scm
+  (define-module (jayu build home users nouun))
 #+END_SRC
 
 
@@ -28,7 +20,9 @@ accessible to the =nouun= user.
 Define a small helper procedure to make mapping packages
 cleaner.
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/home/nouun.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/home/users/nouun.scm
+  (use-modules (gnu packages))
+
   (define (list->pkgs lst)
     (map specification->package+output lst))
 #+END_SRC
@@ -38,7 +32,7 @@ cleaner.
 
 General programs
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/home/nouun.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/home/users/nouun.scm
   (define general-packages
     (list->pkgs
      `("qutebrowser" ;; Qutebrowser seems to have an issue loading GitHub.
@@ -52,7 +46,7 @@ General programs
 Packages specific to X11 which can be easily enabled or
 disabled if switching to a different display server.
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/home/nouun.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/home/users/nouun.scm
   (define x11-packages
     (list->pkgs
      `("rofi"
@@ -68,14 +62,16 @@ Same as X11, just for Wayland. Kiwmi is currently in
 development and is rather unstable so we have to package
 locally.
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/home/nouun.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/home/users/nouun.scm
+  (use-modules (jayu packages wm))
+
   (define wayland-packages
-    (append
-     (list kiwmi)
-     (list->pkgs
-       `("foot"
-         "wofi"
-         "swaybg"))))
+      (append
+       (list kiwmi)
+       (list->pkgs
+	 `("foot"
+	   "wofi"
+	   "swaybg"))))
 #+END_SRC
 
 
@@ -86,7 +82,7 @@ service and that provides an interface for Discord. =discordo=
 has been packaged if I feel like changing back to that, but
 =bitlbee-discord= is working for now.
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/home/nouun.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/home/users/nouun.scm
   (define communication-packages
     (append
      ;(list discordo)
@@ -101,7 +97,7 @@ Most development packages are installed through a =guix shell=
 in their own directories but I still declare some globally
 that I use often.
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/home/nouun.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/home/users/nouun.scm
   (define development-packages
     (list->pkgs
       `("jq")))
@@ -113,7 +109,7 @@ that I use often.
 Some generic fonts used for the terminal or Emacs, most of
 which I don't even use.
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/home/nouun.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/home/users/nouun.scm
   (define font-packages
     (list->pkgs
      `("font-iosevka"
@@ -130,7 +126,7 @@ which I don't even use.
 
 Append all the packages into one list.
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/home/nouun.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/home/users/nouun.scm
   (define nouun-packages
     (append
       general-packages
@@ -146,56 +142,53 @@ Append all the packages into one list.
 
 *** Alacritty
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/home/nouun.scm
-  (use-modules (gnu home)
-               (gnu services)
-               (gnu home services)
+#+BEGIN_SRC scheme :tangle ../jayu/build/home/users/nouun.scm
+  (use-modules (gnu services)
                (gnu home-services terminals))
 
   (define alacritty-services
     (list
       (service home-alacritty-service-type
-        (home-alacritty-configuration
-          (config
-            `((font . ((normal . ((font  . "Noto Sans Mono")))
-                       (bold   . ((font  . "Noto Sans Mono")
-                                  (style . "bold")))
-                       (italic . ((font  . "Noto Sans Mono")
-                                  (style . "light")))
-                       (size   . 10.0)))
-              (window . ((padding . ((x . 20)
-                                     (y . 20)))))
-              (colors . ((primary . ((background . "#F5E9DA")
-                                     (foreground . "#575279")))
-                         (normal . ((black   . "#232136")
-                                    (red     . "#AD4741")
-                                    (green   . "#569F84")
-                                    (yellow  . "#EA9D34")
-                                    (blue    . "#307E9D")
-                                    (magenta . "#907AA9")
-                                    (cyan    . "#56959F")
-                                    (white   . "#F2E9DE")))
-                         (bright . ((black   . "#575279")
-                                    (red     . "#D7827E")
-                                    (green   . "#87BEA9")
-                                    (yellow  . "#F0BA71")
-                                    (blue    . "#73B8D4")
-                                    (magenta . "#B1A2C3")
-                                    (cyan    . "#87B6BE")
-                                    (white   . "#FAF4ED")))))))))))
+	(home-alacritty-configuration
+	  (config
+	    `((font . ((normal . ((font  . "Noto Sans Mono")))
+		       (bold   . ((font  . "Noto Sans Mono")
+				  (style . "bold")))
+		       (italic . ((font  . "Noto Sans Mono")
+				  (style . "light")))
+		       (size   . 10.0)))
+	      (window . ((padding . ((x . 20)
+				     (y . 20)))))
+	      (colors . ((primary . ((background . "#F5E9DA")
+				     (foreground . "#575279")))
+			 (normal . ((black   . "#232136")
+				    (red     . "#AD4741")
+				    (green   . "#569F84")
+				    (yellow  . "#EA9D34")
+				    (blue    . "#307E9D")
+				    (magenta . "#907AA9")
+				    (cyan    . "#56959F")
+				    (white   . "#F2E9DE")))
+			 (bright . ((black   . "#575279")
+				    (red     . "#D7827E")
+				    (green   . "#87BEA9")
+				    (yellow  . "#F0BA71")
+				    (blue    . "#73B8D4")
+				    (magenta . "#B1A2C3")
+				    (cyan    . "#87B6BE")
+				    (white   . "#FAF4ED")))))))))))
 #+END_SRC
 
 
 *** Direnv
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/home/nouun.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/home/users/nouun.scm
   (use-modules (gnu)
-              (gnu packages shellutils)
-              (gnu home services)
-              (gnu home-services base)
-              (gnu home-services shellutils)
-              (guix gexp))
-
+               (gnu packages shellutils)
+               (gnu home services)
+               (gnu home-services base)
+               (gnu home-services shellutils)
+               (guix gexp))
 
  (define-public direnv-services
    (list
@@ -225,7 +218,7 @@ Append all the packages into one list.
 
 *** Git
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/home/nouun.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/home/users/nouun.scm
   (use-modules (gnu home)
                  (gnu packages version-control)
                  (gnu services)
@@ -256,7 +249,7 @@ Append all the packages into one list.
 
 *** Picom
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/home/nouun.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/home/users/nouun.scm
    (use-modules (gnu home)
                  (gnu packages compton)
                  (gnu services)
@@ -286,7 +279,7 @@ Append all the packages into one list.
 
 *** Rofi
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/home/nouun.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/home/users/nouun.scm
   (use-modules (gnu home)
                (gnu services)
                (jayu home services xdisorg))
@@ -362,7 +355,7 @@ Append all the packages into one list.
 
 *** Shells
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/home/nouun.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/home/users/nouun.scm
   (define sh-envvars
     '(("JAYU_HOME"   . "/home/nouun/jayu")
       ("JAYU_SYSTEM" . "verrb")))
@@ -396,7 +389,7 @@ Append all the packages into one list.
 
 **** Bash
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/home/nouun.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/home/users/nouun.scm
   (use-modules (gnu home-services shells))
 
   (define bash-services
@@ -412,16 +405,7 @@ Append all the packages into one list.
 
 **** Zsh
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/home/nouun.scm
-  (use-modules (gnu home)
-               (gnu packages shells)
-               (gnu home-services shells)
-               (gnu services)
-               (gnu home services)
-               (gnu home-services base)
-               (gnu home-services shells)
-               (gnu home-services shellutils))
-
+#+BEGIN_SRC scheme :tangle ../jayu/build/home/users/nouun.scm
   (define-public zsh-services
     (list
       (service home-zsh-service-type
@@ -437,7 +421,7 @@ Append all the packages into one list.
 
 *** nouun
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/home/nouun.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/home/users/nouun.scm
   (define nouun-services
     (append alacritty-services
             bash-services
@@ -451,7 +435,7 @@ Append all the packages into one list.
 
 ** Environment
 
-#+BEGIN_SRC scheme :tangle ../jayu/build/home/nouun.scm
+#+BEGIN_SRC scheme :tangle ../jayu/build/home/users/nouun.scm
   (home-environment
    (packages nouun-packages)
    (services nouun-services))
