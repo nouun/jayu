@@ -16,7 +16,6 @@ desktop setups.
     #:use-module (gnu packages)
     #:use-module (jayu packages wm)
     #:use-module (jayu packages golang)
-    #:use-module (jayu packages hardware)
     #:use-module (jayu packages messaging))
 #+END_SRC
 
@@ -142,6 +141,7 @@ Append all the packages into one list.
       font-packages))
 #+END_SRC
 
+
 ** Services
 
 *** Alacritty
@@ -183,14 +183,6 @@ Append all the packages into one list.
                                     (magenta . "#B1A2C3")
                                     (cyan    . "#87B6BE")
                                     (white   . "#FAF4ED")))))))))))
-#+END_SRC
-
-
-*** Bash
-
-#+BEGIN_SRC scheme :tangle ../jayu/build/home/nouun.scm
-  (define bash-services
-    (list))
 #+END_SRC
 
 
@@ -368,7 +360,57 @@ Append all the packages into one list.
 #+END_SRC
 
 
-*** ZSH
+*** Shells
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/home/nouun.scm
+  (define sh-envvars
+    '(("JAYU_HOME"   . "/home/nouun/jayu")
+      ("JAYU_SYSTEM" . "verrb")))
+
+  (define sh-cat-log
+    "
+  cat-log() {
+    [ -d /tmp/jayu ] || mkdir /tmp/jayu
+    cp $1 /tmp/jayu/log.gz
+    gzip -d /tmp/jayu/log.gz
+    cat /tmp/jayu/log
+    rm /tmp/jayu/log
+  }
+")
+
+  (define sh-guix-extension
+    "
+  guix() {
+    case \"$1\" in
+      locate) guix show $2 | \\
+	grep location | \\
+	xargs -n1 printf '(%s)' | \\
+	sed -e 's/.*:)//g' -e 's/\\.scm.*)$/)/g' -e 's|/| |g' | \\
+	xargs echo ;;
+      ,*) command guix $@ ;;
+    esac
+  }
+")
+#+END_SRC
+
+
+**** Bash
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/home/nouun.scm
+  (use-modules (gnu home-services shells))
+
+  (define bash-services
+	(list
+	  (service home-bash-service-type
+	    (home-bash-configuration
+	      (environment-variables sh-envvars)
+              (bashrc
+                (list sh-cat-log
+                      sh-guix-extension))))))
+#+END_SRC
+
+
+**** Zsh
 
 #+BEGIN_SRC scheme :tangle ../jayu/build/home/nouun.scm
   (use-modules (gnu home)
@@ -384,33 +426,12 @@ Append all the packages into one list.
     (list
       (service home-zsh-service-type
         (home-zsh-configuration
-          (environment-variables
-            '(("HISTFILE" . "$XDG_CACHE_HOME/.zsh_hist")))
+          (environment-variables sh-envvars)
           (zshrc
-            '("\
-  guix() {
-    case \"$1\" in
-      locate) guix show $2 | \\
-        grep location | \\
-        xargs -n1 printf '(%s)' | \\
-        sed -e 's/.*:)//g' -e 's/\\.scm.*)$/)/g' -e 's|/| |g' | \\
-        xargs echo ;;
-      ,*) command guix $@ ;;
-    esac
-  }
+            (list sh-cat-log
+                  sh-guix-extension))))
 
-  view-log() {
-    [ -d /tmp/view-log ] || mkdir /tmp/view-log
-    cp $1 /tmp/view-log/log.gz
-    gzip -d /tmp/view-log/log.gz
-    cat /tmp/view-log/log
-    rm /tmp/view-log/log
-  }"))))
-
-      (service home-zsh-plugin-manager-service-type)
-
-      (home-generic-service 'zsh-packages
-        #:packages (list zsh))))
+      (service home-zsh-plugin-manager-service-type)))
 #+END_SRC
 
 
@@ -426,6 +447,7 @@ Append all the packages into one list.
             rofi-services
             zsh-services))
 #+END_SRC
+
 
 ** Environment
 
