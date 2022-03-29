@@ -45,42 +45,51 @@ To build a specfic system:
   make system SYSTEM=verrb
 #+END_SRC
 
+Note: After reconfiguring the system and relogging, the
+=JAYU_SYSTEM= envvar should be exported (if using a
+configured shell) and you won't have to specify which
+system to build.
+
 * Layout
 
 The main layout is as follows:
 
-** =/config/=
+** [[./config/][=/config/=]]
 
-This contains the main system and home configurations.
+This contains the main System, Home, and theming
+configurations.
 
-*** =/config/home/=
+*** [[./config/home.org][=/config/home.org=]]
 
-This contains specific user setups, including custom
-services for each user.
+This contains specific user setups, all documented in
+org.
 
-*** =/config/system/=
+*** [[./config/system.org][=/config/system.org=]]
 
-This contains the abstracted systems configurations.
+This contains systems configurations, all documented in
+org
 
-** =/jayu/=
+** [[./jayu/][=/jayu/=]]
 
 This directory contains extensions to the Guix standard
 modules including new packages, services, etc.
 
-*** =/jayu/packages/=
+*** [[./jayu/packages/][=/jayu/packages/=]]
 
 This contains packages which aren't found on the official
 Guix channel. Everything outside of
 =/jayu/packages/nonfree.scm= follows GNU's policy on free
 software.
 
-*** =/jayu/patches/=
+*** [[./jayu/patches/][=/jayu/patches/=]]
 
 This contains patches required by some packages to ensure
 that they work as expected on a Guix system. All patches
 are prefixed by their respective package name.
 
-*** =/jayu/home-services/=
+*** [[./jayu/home-services/][=/jayu/home-services/=]]
 
 This contains services for configuring applications which
 aren't officially supported by Guix Home or RDE.
+
+*** [[./jayu/utils/][=/jayu/utils/=]]
