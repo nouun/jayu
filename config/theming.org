@@ -1,0 +1,223 @@
+#+TITLE: Jayu Theming "Engine"
+#+PROPERTY: header-args :mkdirp yes
+
+* Theming "Engine"
+
+** Base
+
+A helper file which contains record types to help easily
+theming programs.
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/home/themes/base.scm
+  (define-module (jayu build home themes base)
+    #:use-module (guix records)
+    #:export (;; Colorscheme
+	      colorscheme colorscheme?
+	      make-colorscheme
+              make-colorscheme-base8     make-colorscheme-base16
+	      colorscheme-black          colorscheme-red
+	      colorscheme-green          colorscheme-yellow
+	      colorscheme-blue           colorscheme-magenta
+	      colorscheme-cyan           colorscheme-white
+	      colorscheme-bright-black   colorscheme-bright-red
+	      colorscheme-bright-green   colorscheme-bright-yellow
+	      colorscheme-bright-blue    colorscheme-bright-magenta
+	      colorscheme-bright-cyan    colorscheme-bright-white
+	      ;; Program Colorscheme
+	      mkcs-alacritty parse-alacritty
+	      ;; Theme
+	      theme theme?
+              make-theme define-theme
+              theme-colorscheme))
+#+END_SRC
+
+
+*** Colorschemes
+
+Store colorschemes in a record so it's more verbose as
+to which color is being accessed rather than an ambiguous
+color 3 or 9.
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/home/themes/base.scm
+  (define-record-type* <colorscheme> colorscheme
+    make-colorscheme
+    colorscheme?
+    (black           colorscheme-black)
+    (red             colorscheme-red)
+    (green           colorscheme-green)
+    (yellow          colorscheme-yellow)
+    (blue            colorscheme-blue)
+    (magenta         colorscheme-magenta)
+    (cyan            colorscheme-cyan)
+    (white           colorscheme-white)
+    (bright-black    colorscheme-bright-black)
+    (bright-red      colorscheme-bright-red)
+    (bright-green    colorscheme-bright-green)
+    (bright-yellow   colorscheme-bright-yellow)
+    (bright-blue     colorscheme-bright-blue)
+    (bright-magenta  colorscheme-bright-magenta)
+    (bright-cyan     colorscheme-bright-cyan)
+    (bright-white    colorscheme-bright-white))
+
+  (use-modules (jayu utils lists))
+
+  (define-public (make-colorscheme-base8 base8)
+    (make-colorscheme (nth 00 base8) (nth 01 base8)
+		      (nth 02 base8) (nth 03 base8)
+		      (nth 04 base8) (nth 05 base8)
+		      (nth 06 base8) (nth 07 base8)
+		      (nth 00 base8) (nth 01 base8)
+		      (nth 02 base8) (nth 03 base8)
+		      (nth 04 base8) (nth 05 base8)
+		      (nth 06 base8) (nth 07 base8)))
+
+  (define-public (make-colorscheme-base16 base16)
+    (make-colorscheme (nth 00 base16) (nth 01 base16)
+		      (nth 02 base16) (nth 03 base16)
+		      (nth 04 base16) (nth 05 base16)
+		      (nth 06 base16) (nth 07 base16)
+		      (nth 08 base16) (nth 09 base16)
+		      (nth 10 base16) (nth 11 base16)
+		      (nth 12 base16) (nth 13 base16)
+		      (nth 14 base16) (nth 15 base16)))
+#+END_SRC
+
+
+*** Program colorschemes
+
+Using base 16 colors everywhere is fine until you want
+to tweak a specific color or a program, so creating a
+seperate colorscheme per program.
+
+
+**** Alacritty
+
+Alacritty only really needs the base16 colors, but also
+takes a few extras like cursor and background color. 
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/home/themes/base.scm
+    (define-record-type* <colorscheme-alacritty> colorscheme-alacritty
+      %make-colorscheme-alacritty
+      colorscheme-alacritty?
+      (cursor-background colorscheme-alacritty-cursor-background)
+      (cursor-foreground colorscheme-alacritty-cursor-foreground)
+      (background        colorscheme-alacritty-background)
+      (foreground        colorscheme-alacritty-foreground)
+      (black             colorscheme-alacritty-black)
+      (red               colorscheme-alacritty-red)
+      (green             colorscheme-alacritty-green)
+      (yellow            colorscheme-alacritty-yellow)
+      (blue              colorscheme-alacritty-blue)
+      (magenta           colorscheme-alacritty-magenta)
+      (cyan              colorscheme-alacritty-cyan)
+      (white             colorscheme-alacritty-white)
+      (bright-black      colorscheme-alacritty-bright-black)
+      (bright-red        colorscheme-alacritty-bright-red)
+      (bright-green      colorscheme-alacritty-bright-green)
+      (bright-yellow     colorscheme-alacritty-bright-yellow)
+      (bright-blue       colorscheme-alacritty-bright-blue)
+      (bright-magenta    colorscheme-alacritty-bright-magenta)
+      (bright-cyan       colorscheme-alacritty-bright-cyan)
+      (bright-white      colorscheme-alacritty-bright-white))
+
+  (define* (mkcs-alacritty base-colorscheme
+	     #:key (cursor-background #f) (cursor-foreground #f)
+		   (background        #f) (foreground        #f)
+		   (black             #f) (red               #f)
+		   (green             #f) (yellow            #f)
+		   (blue              #f) (magenta           #f)
+		   (cyan              #f) (white             #f)
+		   (bright-black      #f) (bright-red        #f)
+		   (bright-green      #f) (bright-yellow     #f)
+		   (bright-blue       #f) (bright-magenta    #f)
+		   (bright-cyan       #f) (bright-white      #f))
+    "Create an alacritty config from BASE-COLORSCHEME,
+  with the ability to override specific color values."
+    (unless (colorscheme? base-colorscheme)
+      (throw "base-colorscheme is not of type <colorscheme>"))
+    (%make-colorscheme-alacritty
+     (or cursor-background (colorscheme-black          base-colorscheme))
+     (or cursor-foreground (colorscheme-white          base-colorscheme))
+     (or background        (colorscheme-white          base-colorscheme))
+     (or foreground        (colorscheme-black          base-colorscheme))
+     (or black             (colorscheme-black          base-colorscheme))
+     (or red               (colorscheme-red            base-colorscheme))
+     (or green             (colorscheme-green          base-colorscheme))
+     (or yellow            (colorscheme-yellow         base-colorscheme))
+     (or blue              (colorscheme-blue           base-colorscheme))
+     (or magenta           (colorscheme-magenta        base-colorscheme))
+     (or cyan              (colorscheme-cyan           base-colorscheme))
+     (or white             (colorscheme-white          base-colorscheme))
+     (or bright-black      (colorscheme-bright-black   base-colorscheme))
+     (or bright-red        (colorscheme-bright-red     base-colorscheme))
+     (or bright-green      (colorscheme-bright-green   base-colorscheme))
+     (or bright-yellow     (colorscheme-bright-yellow  base-colorscheme))
+     (or bright-blue       (colorscheme-bright-blue    base-colorscheme))
+     (or bright-magenta    (colorscheme-bright-magenta base-colorscheme))
+     (or bright-cyan       (colorscheme-bright-cyan    base-colorscheme))
+     (or bright-white      (colorscheme-bright-white   base-colorscheme))))
+#+END_SRC
+
+
+*** Themes
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/home/themes/base.scm
+    (define-record-type* <theme> theme
+      %make-theme
+      theme?
+      (colorscheme theme-colorscheme)
+      (alacritty   theme-alacritty))
+
+  (define* (make-theme colorscheme
+	     #:key (alacritty #f))
+    (%make-theme colorscheme
+      (or alacritty (mkcs-alacritty colorscheme))))
+
+  (define-macro (define-theme base . args)
+    `(begin
+       (define base ,base)
+       (define theme (make-theme base ,@args))))
+#+END_SRC
+
+* Themes
+
+** Rose Pine Sepia
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/home/themes/rose-pine-sepia.scm
+  (define-module (jayu build home themes rose-pine-sepia)
+    #:use-module (jayu build home themes base)
+    #:export (base theme))
+
+  (define fg    "#575279")
+  (define bg    "#F5E9DA")
+  (define ovr   "#EDD7BD")
+  (define blk   "#232136")
+  (define lblk  "#575279")
+  (define xlblk "#a7a4c1")
+  (define red   "#ad4741")
+  (define lred  "#D7827E")
+  (define xlred "#ebc0be")
+  (define grn   "#569F84")
+  (define lgrn  "#87bea9")
+  (define xlgrn "#c3ded4")
+  (define ylw   "#EA9D34")
+  (define lylw  "#f0ba71")
+  (define xlylw "#f7dcb8")
+  (define blu   "#307e9d")
+  (define lblu  "#73b8d4")
+  (define xlblu "#b9dbe9")
+  (define ppl   "#907AA9")
+  (define lppl  "#b1a2c3")
+  (define xlppl "#d8d1e1")
+  (define cyn   "#56959F")
+  (define lcyn  "#87b6be")
+  (define xlcyn "#c3dade")
+  (define wht   "#F2E9DE")
+  (define lwht  "#FAF4ED")
+  (define xlwht "#fcf9f6")
+
+  (define-theme
+    (make-colorscheme
+      blk  red  grn  ylw  blu  ppl  cyn  wht
+      lblk lred lgrn lylw lblu lppl lcyn lwht))
+#+END_SRC
