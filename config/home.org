@@ -1,15 +1,28 @@
 #+TITLE: Guix Home Configuration
 #+PROPERTY: header-args :mkdirp yes
 
-
 * nouun
 
 nouun is my main user account which is used on my all my
 desktop setups.
 
 #+BEGIN_SRC scheme :tangle ../jayu/build/home/users/nouun.scm
-  (define-module (jayu build home users nouun))
+  (define-module (jayu build home users nouun)
+    #:use-module ((jayu build home themes rose-pine-sepia) #:prefix rps:))
 #+END_SRC
+
+** Theming
+
+Set the current theme, this will be used to configure the
+colorscheme of external programs.
+
+Available Themes:
+  rps - All natural pine, faux fur and a bit of soho vibes with a sepia twist"
+  
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/home/users/nouun.scm
+  (define current-theme rps:theme)
+  #+END_SRC
 
 
 ** Packages
@@ -36,8 +49,12 @@ General programs
   (define general-packages
     (list->pkgs
      `("qutebrowser" ;; Qutebrowser seems to have an issue loading GitHub.
-       "ungoogled-chromium"
-       "imagemagick")))
+       "firefox" ;;ungoogled-chromium"
+       "imagemagick"
+       "inkscape"
+       "kdevelop"
+       "zathura"
+       "zathura-pdf-mupdf")))
 #+END_SRC
 
 
@@ -47,12 +64,17 @@ Packages specific to X11 which can be easily enabled or
 disabled if switching to a different display server.
 
 #+BEGIN_SRC scheme :tangle ../jayu/build/home/users/nouun.scm
+  (use-modules (jayu packages scripts))
+
   (define x11-packages
-    (list->pkgs
-     `("rofi"
-       "maim"
-       "xclip"
-       "xterm")))
+    (append
+      (list
+        treeshot)
+      (list->pkgs
+       `("rofi"
+         "maim"
+         "xclip"
+         "xterm"))))
 #+END_SRC
 
 
@@ -100,7 +122,14 @@ that I use often.
 #+BEGIN_SRC scheme :tangle ../jayu/build/home/users/nouun.scm
   (define development-packages
     (list->pkgs
-      `("jq")))
+      `(;; Sh
+        "jq"
+        ;; C/C++
+        "cmake" "gcc" "clang" "ccls" "gdb"
+        ;; Python
+        "python"
+        ;; Node
+        "node")))
 #+END_SRC
 
 
@@ -148,35 +177,44 @@ Append all the packages into one list.
 
   (define alacritty-services
     (list
-      (service home-alacritty-service-type
-	(home-alacritty-configuration
-	  (config
-	    `((font . ((normal . ((font  . "Noto Sans Mono")))
-		       (bold   . ((font  . "Noto Sans Mono")
-				  (style . "bold")))
-		       (italic . ((font  . "Noto Sans Mono")
-				  (style . "light")))
-		       (size   . 10.0)))
-	      (window . ((padding . ((x . 20)
-				     (y . 20)))))
-	      (colors . ((primary . ((background . "#F5E9DA")
-				     (foreground . "#575279")))
-			 (normal . ((black   . "#232136")
-				    (red     . "#AD4741")
-				    (green   . "#569F84")
-				    (yellow  . "#EA9D34")
-				    (blue    . "#307E9D")
-				    (magenta . "#907AA9")
-				    (cyan    . "#56959F")
-				    (white   . "#F2E9DE")))
-			 (bright . ((black   . "#575279")
-				    (red     . "#D7827E")
-				    (green   . "#87BEA9")
-				    (yellow  . "#F0BA71")
-				    (blue    . "#73B8D4")
-				    (magenta . "#B1A2C3")
-				    (cyan    . "#87B6BE")
-				    (white   . "#FAF4ED")))))))))))
+     (service home-alacritty-service-type
+       (home-alacritty-configuration
+        (config
+         `((font . ((normal . ((font  . "Noto Sans Mono")))
+                    (bold   . ((font  . "Noto Sans Mono")
+                               (style . "bold")))
+                    (italic . ((font  . "Noto Sans Mono")
+                               (style . "light")))
+                    (size   . 10.0)))
+           (window . ((padding . ((x . 20)
+                                  (y . 20)))))
+           (colors . ((primary . ((background . "#F5E9DA")
+                                  (foreground . "#575279")))
+                      (normal . ((black   . "#232136")
+                                 (red     . "#AD4741")
+                                 (green   . "#569F84")
+                                 (yellow  . "#EA9D34")
+                                 (blue    . "#307E9D")
+                                 (magenta . "#907AA9")
+                                 (cyan    . "#56959F")
+                                 (white   . "#F2E9DE")))
+                      (bright . ((black   . "#575279")
+                                 (red     . "#D7827E")
+                                 (green   . "#87BEA9")
+                                 (yellow  . "#F0BA71")
+                                 (blue    . "#73B8D4")
+                                 (magenta . "#B1A2C3")
+                                 (cyan    . "#87B6BE")
+                                 (white   . "#FAF4ED")))))))))))
+#+END_SRC
+
+
+*** Awesome
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/home/users/nouun.scm
+  (define awesome-services
+    (list))
+;      ()))
 #+END_SRC
 
 
@@ -263,9 +301,13 @@ Append all the packages into one list.
               (home-picom-configuration
                (config
                 `((shadow . #t)
-                  (shadow-radius . 25)
-                  (shadow-offset-x . -20)
-                  (shadow-offset-y . -20)
+;                  (shadow-radius . 25)
+;                  (shadow-offset-x . -20)
+;                  (shadow-offset-y . -20)
+;                  (shadow-opacity . 0.5)
+                  (shadow-radius . 0)
+                  (shadow-offset-x . 12)
+                  (shadow-offset-y . 12)
                   (shadow-opacity . 0.5)
                   (shadow-exclude ("name = 'Notification'"
                                    "name = 'Icecat'"
@@ -356,34 +398,201 @@ Append all the packages into one list.
 *** Shells
 
 #+BEGIN_SRC scheme :tangle ../jayu/build/home/users/nouun.scm
-  (define sh-envvars
-    '(("JAYU_HOME"   . "/home/nouun/jayu")
-      ("JAYU_SYSTEM" . "verrb")))
+    (define sh-envvars
+      '(("JAYU_HOME"   . "/home/nouun/jayu")
+        ("JAYU_SYSTEM" . "verrb")))
 
-  (define sh-cat-log
-    "
-  cat-log() {
-    [ -d /tmp/jayu ] || mkdir /tmp/jayu
-    cp $1 /tmp/jayu/log.gz
-    gzip -d /tmp/jayu/log.gz
-    cat /tmp/jayu/log
-    rm /tmp/jayu/log
+    (define sh-colors
+      "
+  esc() {
+    echo \"\\033[$@m\"
   }
-")
 
-  (define sh-guix-extension
-    "
-  guix() {
-    case \"$1\" in
-      locate) guix show $2 | \\
-	grep location | \\
-	xargs -n1 printf '(%s)' | \\
-	sed -e 's/.*:)//g' -e 's/\\.scm.*)$/)/g' -e 's|/| |g' | \\
-	xargs echo ;;
-      ,*) command guix $@ ;;
-    esac
-  }
-")
+  RED=$(esc '1;31')
+  GREEN=$(esc '1;32')
+  CLEAR=$(esc '0')
+  ")
+
+    (define sh-cat-log
+      "
+    cat-log() {
+      [ -d /tmp/jayu ] || mkdir /tmp/jayu
+      cp $1 /tmp/jayu/log.gz
+      gzip -d /tmp/jayu/log.gz
+      cat /tmp/jayu/log
+      rm /tmp/jayu/log
+    }
+  ")
+
+    (define sh-jayu
+      "
+    __jayu_echo() {
+      echo -e \" [${GREEN}Jayu${CLEAR}] $@\"
+    }
+
+    __jayu_err() {
+      echo -e \" [${GREEN}Jayu${CLEAR}] $@\"
+    }
+
+    __jayu_config() {
+      CMD=\"$1\"
+      shift
+
+      if [ -z \"$CMD\" ]; then
+        __jayu_err \"No subcommand specified. Use 'jayu help config' for more information.\"
+        return 1;
+      fi
+
+      case \"$CMD\" in
+        pull|p)
+          cd \"$JAYU_HOME\"
+          make pull
+          ;;
+        home|h)
+          cd \"$JAYU_HOME\"
+          make home $@
+          ;;
+        system|s)
+          cd \"$JAYU_HOME\"
+          make system $@
+          ;;
+        ,*)
+          __jayu_err \"Unknown command $1\"
+          return 1
+          ;;
+      esac
+    }
+
+    __jayu_locate() {
+      guix show $1 | \\
+        grep location | \\
+        xargs -n1 printf '(%s)' | \\
+        sed -e 's/.*:)//g' -e 's/\\.scm.*)$/)/g' -e 's|/| |g' | \\
+        xargs echo
+    }
+
+    __jayu_manifest() {
+       MANIFEST_NAME=$(echo \"$1\" | tr 'A-Z' 'a-z')
+       MANIFEST=\"$JAYU_HOME/jayu/manifests/$MANIFEST_NAME.scm\"
+       shift
+
+       if [ -z \"$MANIFEST_NAME\" ]; then
+           ls \"$JAYU_HOME/jayu/manifests/\" | \
+             sed -e \"s/.scm//g\" | \
+             fzf --preview=\"cat $JAYU_HOME/jayu/manifests/{}.scm\" |
+             __jayu_manifest
+         return @?
+       fi
+
+       case \"$MANIFEST_NAME\" in
+         .)
+           if [ ! -f \"./guix-manifest.scm\"]; then
+             __jayu_echo \"Creating Guix environment with guix-manifest.scm\"
+             guix environment --manifest=guix-manifest.scm $@
+           fi
+           return 0
+           ;;
+         list|l)
+           __jayu_echo 'Valid Manifests:'
+           ls \"$JAYU_HOME/jayu/manifests/\" | \
+             sed -e \"s/.scm//g\"
+
+         return 0
+         ;;
+       esac
+
+       if [ ! -f \"$MANIFEST\" ]; then
+         __jayu_err \"$MANIFEST_NAME manifest does not exist\"
+         return 0
+       else
+         __jayu_echo \"Creating Guix environment with $MANIFEST\"
+         guix environment --manifest=\"$MANIFEST\" $@
+       fi
+    }
+
+    __jayu_help() {
+      if [ -z \"$1\" ]; then
+        echo '  Jayu'
+        echo '    Helper tool for Guix'
+        echo ''
+        echo '  Commands'
+        echo '    config   - Config Guix'
+        echo '    help     - Shows this message'
+        echo '    locate   - Locate a guix package'
+        echo '    manifest - Load a Jayu manifest'
+      else
+        case \"$1\" in
+          help|h)
+            echo '  Jayu - help'
+            echo '    Disable information about a command'
+            echo ''
+            echo '  Usage'
+            echo '    jayu help [COMMAND]'
+            echo ''
+            echo '  Example'
+            echo '    jayu help'
+            echo '    jayu help manifest'
+            ;;
+          config|c)
+            echo '  Jayu - config'
+            echo '    Helper for Jayu config'
+            echo ''
+            echo '  Usage'
+            echo '    jayu config COMMAND'
+            echo ''
+            echo '  Commands'
+            echo '    home   - Reconfigure Guix Home'
+            echo '    system - Reconfigure Guix System'
+            echo ''
+            echo '  Example'
+            echo '    jayu config home'
+            echo '    jayu config system'
+            ;;
+          locate|l)
+            echo '  Jayu - locate'
+            echo '    Locate a Guix package by name'
+            echo ''
+            echo '  Usage'
+            echo '    jayu locate PACKAGE'
+            echo ''
+            echo '  Example'
+            echo '    jayu locate gcc'
+            echo '    jayu locate weechat'
+            ;;
+          manifest|m)
+            echo '  Jayu - manifest'
+            echo '    Create a Guix environment from a Jayu manifest file'
+            echo ''
+            echo '  Usage'
+            echo '    jayu help COMMAND|MANIFEST'
+            echo ''
+            echo '  Commands'
+            echo '    list - Lists Jayu manifests'
+            echo ''
+            echo '  Example'
+            echo '    jayu manifest list'
+            echo '    jayu manifest qmk'
+            ;;
+          ,*)
+            __jayu_err \"Unknown command $1\"
+            return 1
+            ;;
+        esac
+      fi
+    }
+
+    jayu() {
+      CMD=\"$1\"
+      shift
+
+      case \"$CMD\" in
+        config|c)   __jayu_config   $@ ;; 
+        locate|l)   __jayu_locate   $@ ;; 
+        manifest|m) __jayu_manifest $@ ;;
+        ,*)          __jayu_help     $@ ;;
+      esac
+    }
+  ")
 #+END_SRC
 
 
@@ -398,8 +607,9 @@ Append all the packages into one list.
 	    (home-bash-configuration
 	      (environment-variables sh-envvars)
               (bashrc
-                (list sh-cat-log
-                      sh-guix-extension))))))
+                (list sh-colors
+                      sh-cat-log
+                      sh-jayu))))))
 #+END_SRC
 
 
@@ -412,8 +622,9 @@ Append all the packages into one list.
         (home-zsh-configuration
           (environment-variables sh-envvars)
           (zshrc
-            (list sh-cat-log
-                  sh-guix-extension))))
+            (list sh-colors
+                  sh-cat-log
+                  sh-jayu))))
 
       (service home-zsh-plugin-manager-service-type)))
 #+END_SRC

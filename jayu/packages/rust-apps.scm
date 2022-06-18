@@ -25,17 +25,18 @@
   (package
     (name "wezterm")
     (version "20220101-133340-7edc5b5a")
-    (source (origin
-             (method git-fetch)
-             (uri (git-reference
-                   (url "https://github.com/wez/wezterm")
-                   (commit version)))
-             (file-name (git-file-name name version))
-             (sha256
-              (base32 "08wmljisa2dd1p2k57i7ahqb49ffyl3cqps5ggladx0lbqjm89dz"))
-             (patches
-	       (list
-		(local-file "../patches/wezterm-fix-cargo-git.patch")))))
+    (source
+     (origin
+      (method git-fetch)
+      (uri (git-reference
+            (url "https://github.com/wez/wezterm")
+            (commit version)))
+      (file-name (git-file-name name version))
+      (sha256
+       (base32 "08wmljisa2dd1p2k57i7ahqb49ffyl3cqps5ggladx0lbqjm89dz"))
+      (patches
+	     (list
+		       (local-file "../patches/wezterm-fix-cargo-git.patch")))))
     (build-system cargo-build-system)
     (inputs
      (list fontconfig zlib libx11 libxcb libssh2 libxkbcommon openssl
@@ -47,40 +48,41 @@
 
        ;; Submodules
        ("harfbuzz-src"
-        ,(origin (method git-fetch)
-           (uri (git-reference
-                 (url "https://github.com/harfbuzz/harfbuzz/")
-                 (commit "0a129961341da370ec82bfccdd11ec9b1094b5a2")))
-           (file-name "harfbuzz-src-checkout")
-           (sha256
-            (base32 "01n4wzya5sh8xp8zvaznz29lwar44fy19i3drxn7465qpx6011pi"))))
+        ,(origin
+          (method git-fetch)
+          (uri (git-reference
+                (url "https://github.com/harfbuzz/harfbuzz/")
+                (commit "0a129961341da370ec82bfccdd11ec9b1094b5a2")))
+          (file-name "harfbuzz-src-checkout")
+          (sha256
+           (base32 "01n4wzya5sh8xp8zvaznz29lwar44fy19i3drxn7465qpx6011pi"))))
        ("libpng-src"
         ,(origin
-           (method git-fetch)
-           (uri (git-reference
-                 (url "https://github.com/glennrp/libpng/")
-                 (commit "8439534daa1d3a5705ba92e653eda9251246dd61")))
-           (file-name "libpng-src-checkout")
-           (sha256
-            (base32 "032a19g3agjkjw44zih5c0hmhjbfi50zdp3772zng0i78nki3ryp"))))
+          (method git-fetch)
+          (uri (git-reference
+                (url "https://github.com/glennrp/libpng/")
+                (commit "8439534daa1d3a5705ba92e653eda9251246dd61")))
+          (file-name "libpng-src-checkout")
+          (sha256
+           (base32 "032a19g3agjkjw44zih5c0hmhjbfi50zdp3772zng0i78nki3ryp"))))
        ("zlib-src"
         ,(origin
-           (method git-fetch)
-           (uri (git-reference
-                 (url "https://github.com/madler/zlib/")
-                 (commit "cacf7f1d4e3d44d871b605da3b647f07d718623f")))
-           (file-name "zlib-src-checkout")
-           (sha256
-            (base32 "037v8a9cxpd8mn40bjd9q6pxmhznyqpg7biagkrxmkmm91mgm5lg"))))
+          (method git-fetch)
+          (uri (git-reference
+                (url "https://github.com/madler/zlib/")
+                (commit "cacf7f1d4e3d44d871b605da3b647f07d718623f")))
+          (file-name "zlib-src-checkout")
+          (sha256
+           (base32 "037v8a9cxpd8mn40bjd9q6pxmhznyqpg7biagkrxmkmm91mgm5lg"))))
        ("freetype2-src"
         ,(origin
-           (method git-fetch)
-           (uri (git-reference
-                 (url "https://github.com/wez/freetype2/")
-                 (commit "3f83daeecb1a78d851b660eed025eeba362c0e4a")))
-           (file-name "freetype2-src-checkout")
-           (sha256
-            (base32 "1w9915a8pl5p4klw56a2qjq38a6g5iiw3fp1b1qblh5igyzgp213"))))))
+          (method git-fetch)
+          (uri (git-reference
+                (url "https://github.com/wez/freetype2/")
+                (commit "3f83daeecb1a78d851b660eed025eeba362c0e4a")))
+          (file-name "freetype2-src-checkout")
+          (sha256
+           (base32 "1w9915a8pl5p4klw56a2qjq38a6g5iiw3fp1b1qblh5igyzgp213"))))))
     (arguments
      `(#:tests? #false
        #:phases

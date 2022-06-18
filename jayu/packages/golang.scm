@@ -9,6 +9,7 @@
   #:use-module (gnu packages)
   #:use-module (gnu packages golang)
   #:use-module (gnu packages glib)
+  #:use-module (gnu packages syncthing)
   #:use-module (guix build-system go))
 
 (define-public go-github-com-alecthomas-kong

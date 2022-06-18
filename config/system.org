@@ -97,8 +97,9 @@ machines.
       (append
 	(map (compose list specification->package+output)
 	'("curl" "dbus" "emacs" "gash" "git" "gnupg"
-	  "guile-readline" "make" "ncurses" "nss-certs"
-	  "openssh" "wget" "vim" "xdg-user-dirs" "xdg-utils"))
+	  "guile-readline" "make" "ncurses" "nss-certs" "openssh" 
+          "wget" "vim" "xdg-user-dirs" "xdg-utils"
+          "docker" "docker-cli" "docker-compose" "containerd"))
 	%base-packages))
 #+END_SRC
 
@@ -112,7 +113,7 @@ Bash to =/bin/bash=, and Dash to =/bin/sh=.
   (define-public jayu-file-services
     (list
       (extra-special-file "/usr/bin/env"
-			  (file-append coreutils "/usr/bin/env"))
+			  (file-append coreutils "/bin/env"))
       (extra-special-file "/bin/zsh"
 			  (file-append zsh "/bin/zsh"))
       (extra-special-file "/bin/bash"
@@ -121,6 +122,34 @@ Bash to =/bin/bash=, and Dash to =/bin/sh=.
 			  (file-append dash "/bin/dash"))))
 #+END_SRC
 
+*** Open ports
+
+Allow inbound connection on port 9090.
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/base.scm
+  (use-modules (gnu services networking))  
+
+  (define-public jayu-port-services
+    (list
+      (service iptables-service-type
+        (iptables-configuration
+          (ipv4-rules (plain-file "iptables.rules" "*filter
+  :INPUT ACCEPT
+  :FORWARD ACCEPT
+  :OUTPUT ACCEPT
+  -A INPUT -p tcp --dport 9090 -j ACCEPT
+  COMMIT
+  "))))))
+#+END_SRC
+
+Combine services into base services.
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/base.scm
+(define-public jayu-base-services
+  (append
+    jayu-port-services
+    jayu-file-services))
+#+END_SRC
 
 ** Users
 
@@ -159,23 +188,23 @@ specific machine configuration.
 
       (users jayu-base-users)
       (packages jayu-base-packages)
-      (services jayu-file-services)
+      (services jayu-base-services)
 
       (bootloader
-	(bootloader-configuration
-	  (bootloader grub-efi-bootloader)
-	  (targets (list "/boot/efi"))))
+        (bootloader-configuration
+         (bootloader grub-efi-bootloader)
+         (targets (list "/boot/efi"))))
 
       ;; Guix requires file-system to be defined to create an operating-system
       ;; so pass through a dummy file system which will be overriden in each
       ;; machine configuration.
       (file-systems
-	(cons* (file-system
-		 (mount-point "/")
-		 (device "none")
-		 (type "ext4")
-		 (check? #f))
-	       %base-file-systems))))
+       (cons* (file-system
+                (mount-point "/")
+                (device "none")
+                (type "ext4")
+                (check? #f))
+         %base-file-systems))))
 #+END_SRC
 
 * Machines
@@ -288,13 +317,27 @@ electron client.
 #+END_SRC
 
 
+**** Nix
+
+Enable Nix support for those few packages I cannot be bothered packaging.
+
+#+BEGIN_SRC scheme :tangle ../jayu/build/system/systems/verrb.scm
+  (use-service-modules nix)
+
+  (define verrb-nix-service
+    (service nix-service-type))
+#+END_SRC
+
+
 **** Desktop Services
 
 Modify the default desktop services to do the following:
 
 1) Remove GDM as SDDM is used instead.
-2) Set Guix to always use 4 cores.
-3) Stop network-manager from modifying /etc/resolve.conf
+2) Allow changing backlight without root.
+3) Set Guix to always use 4 cores.
+3) Set power button suspend instead of shutdown.
+4) Stop network-manager from modifying /etc/resolve.conf
 
 To use the Nonguix substitute server, we need to modify
 the guix service and add the substitute server as well as
@@ -302,26 +345,48 @@ the signing key.
 
 #+BEGIN_SRC scheme :tangle ../jayu/build/system/systems/verrb.scm
   (define verrb-desktop-services
+    (cons*
+     (udev-rules-service 'backlight
+                         (udev-rule
+                          "backlight.rules"
+                          (string-append
+                           "ACTION==\"add\", "
+                           "SUBSYSTEM==\"backlight\", "
+                           "KERNEL==\"intel_backlight\", "
+                           "RUN+=\"/run/current-system/profile/bin/chgrp video /sys/class/backlight/%k/brightness\""
+                           "\n"
+                           "ACTION==\"add\", "
+                           "SUBSYSTEM==\"backlight\", "
+                           "KERNEL==\"intel_backlight\", "
+                           "RUN+=\"/run/current-system/profile/bin/chmod g+w /sys/class/backlight/%k/brightness\""
+                           "\n")))
+
+
      (modify-services
-       (remove (lambda (service)
-		(eq? (service-kind service) gdm-service-type))
-	   %desktop-services)
+      (remove (lambda (service)
+                (eq? (service-kind service) gdm-service-type))
+              %desktop-services)
 
-       (guix-service-type
-	 config => (guix-configuration
-		    (inherit config)
-		    (extra-options '("--max-job=4"))
-                    (substitute-urls
-                     (append %default-substitute-urls
-                       (list "https://substitutes.nonguix.org")))
-                    (authorized-keys
-                     (append %default-authorized-guix-keys
-                       (list (local-file "../../nonguix-key.pub"))))))
+      (guix-service-type
+       config => (guix-configuration
+                  (inherit config)
+                  (extra-options '("--max-job=4"))
+                  (substitute-urls
+                   (append %default-substitute-urls
+                           (list "https://substitutes.nonguix.org")))
+                  (authorized-keys
+                   (append %default-authorized-guix-keys
+                           (list (local-file "../../nonguix-key.pub"))))))
 
-       (network-manager-service-type
-	 config => (network-manager-configuration
-		    (inherit config)
-		    (dns "none")))))
+      (elogind-service-type
+       config => (elogind-configuration
+                  (inherit config)
+                  (handle-power-key 'suspend)))
+
+      (network-manager-service-type
+       config => (network-manager-configuration
+                  (inherit config)
+                  (dns "none"))))))
 #+END_SRC
 
 **** Verrb Services
@@ -329,12 +394,14 @@ the signing key.
 Append all services into a single list.
 
 #+BEGIN_SRC scheme :tangle ../jayu/build/system/systems/verrb.scm
-  (define verrb-services
-    (append (list verrb-sddm-service
-		  verrb-qmk-udev-service
-		  verrb-bitlbee-service)
-	    verrb-desktop-services
-	    jayu-file-services))
+    (define verrb-services
+      (append
+       (list verrb-sddm-service
+        verrb-qmk-udev-service
+        verrb-bitlbee-service
+        verrb-nix-service)
+       verrb-desktop-services
+       jayu-file-services))
 #+END_SRC
 
 
@@ -495,6 +562,7 @@ Git frontend
                  pronouun-cgit-nginx-configuration)))))
 #+END_SRC
 
+
 **** Nginx
 
 nginx
@@ -564,6 +632,7 @@ dhcp
   (define pronouun-dhcp-service
     (service dhcp-client-service-type))
 #+END_SRC
+
 
 **** OpenSSH
 

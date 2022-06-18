@@ -29,7 +29,10 @@ clean:
 --tangle-home: --tangle-emacs
 	@{ \
 		echo -e "--> [${GREEN}Jayu${CLEAR}] Building home configuration"
-		emacs --batch --eval "(require 'org)" --eval '(org-babel-tangle-file "config/home.org")'
+		emacs --batch \
+			--eval "(require 'org)" \
+			--eval '(org-babel-tangle-file "config/home.org")' \
+			--eval '(org-babel-tangle-file "config/theming.org")'
 	}
 
 .ONESHELL:
